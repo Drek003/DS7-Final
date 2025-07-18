@@ -1,0 +1,450 @@
+/* Bootstrap Dark Theme Overrides */
+
+/* Override Bootstrap's default colors for dark theme */
+:root {
+  --bs-primary: #00d4aa;
+  --bs-primary-rgb: 0, 212, 170;
+  --bs-secondary: #6c757d;
+  --bs-secondary-rgb: 108, 117, 125;
+  --bs-success: #00d4aa;
+  --bs-success-rgb: 0, 212, 170;
+  --bs-info: #4ecdc4;
+  --bs-info-rgb: 78, 205, 196;
+  --bs-warning: #ffd93d;
+  --bs-warning-rgb: 255, 217, 61;
+  --bs-danger: #ff6b6b;
+  --bs-danger-rgb: 255, 107, 107;
+  --bs-light: #16213e;
+  --bs-light-rgb: 22, 33, 62;
+  --bs-dark: #0f0f23;
+  --bs-dark-rgb: 15, 15, 35;
+  --bs-body-color: #ffffff;
+  --bs-body-bg: #0f0f23;
+  --bs-border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Override Bootstrap components for dark theme */
+.bg-light {
+  background-color: var(--surface-light) !important;
+}
+
+.bg-dark {
+  background-color: var(--surface-color) !important;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+.text-light {
+  color: var(--text-secondary) !important;
+}
+
+/* Override form controls */
+.form-control, .form-select {
+  background-color: var(--surface-light);
+  border-color: var(--surface-light);
+  color: var(--text-primary);
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: var(--surface-light);
+  border-color: var(--accent-color);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 0.2rem rgba(0, 212, 170, 0.25);
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+
+/* Override dropdowns */
+.dropdown-menu {
+  background-color: var(--surface-color);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item {
+  color: var(--text-secondary);
+}
+
+.dropdown-item:hover {
+  background-color: var(--surface-light);
+  color: var(--accent-color);
+}
+
+.dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Override modals */
+.modal-content {
+  background-color: var(--surface-color);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+  background-color: var(--surface-light);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.modal-footer {
+  background-color: var(--surface-light);
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.modal-title {
+  color: var(--text-primary);
+}
+
+/* Override tables */
+.table {
+  color: var(--text-secondary);
+}
+
+.table thead th {
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.table tbody tr {
+  background-color: var(--surface-color);
+}
+
+.table tbody tr:hover {
+  background-color: var(--surface-light);
+}
+
+.table td, .table th {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Override pagination */
+.page-link {
+  background-color: var(--surface-color);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+}
+
+.page-link:hover {
+  background-color: var(--surface-light);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.page-item.active .page-link {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: var(--white);
+}
+
+.page-item.disabled .page-link {
+  background-color: var(--surface-color);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+/* Override tooltips */
+.tooltip .tooltip-inner {
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+}
+
+.tooltip.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: var(--surface-color);
+}
+
+.tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: var(--surface-color);
+}
+
+.tooltip.bs-tooltip-start .tooltip-arrow::before {
+  border-left-color: var(--surface-color);
+}
+
+.tooltip.bs-tooltip-end .tooltip-arrow::before {
+  border-right-color: var(--surface-color);
+}
+
+/* Override popovers */
+.popover {
+  background-color: var(--surface-color);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.popover-header {
+  background-color: var(--surface-light);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.popover-body {
+  color: var(--text-secondary);
+}
+
+/* Override list groups */
+.list-group-item {
+  background-color: var(--surface-color);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+}
+
+.list-group-item:hover {
+  background-color: var(--surface-light);
+}
+
+.list-group-item.active {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: var(--white);
+}
+
+/* Override breadcrumbs */
+.breadcrumb {
+  background-color: var(--surface-light);
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  color: var(--text-muted);
+}
+
+.breadcrumb-item.active {
+  color: var(--text-muted);
+}
+
+/* Override progress bars */
+.progress {
+  background-color: var(--surface-light);
+}
+
+/* Override spinners */
+.spinner-border {
+  color: var(--accent-color);
+}
+
+.spinner-grow {
+  color: var(--accent-color);
+}
+
+/* Override close button */
+.btn-close {
+  filter: invert(1);
+}
+
+/* Override input groups */
+.input-group-text {
+  background-color: var(--surface-light);
+  border-color: var(--surface-light);
+  color: var(--text-muted);
+}
+
+/* Override validation states */
+.was-validated .form-control:valid,
+.form-control.is-valid {
+  border-color: var(--success);
+  background-color: var(--surface-light);
+}
+
+.was-validated .form-control:invalid,
+.form-control.is-invalid {
+  border-color: var(--error);
+  background-color: var(--surface-light);
+}
+
+.valid-feedback {
+  color: var(--success);
+}
+
+.invalid-feedback {
+  color: var(--error);
+}
+
+/* Override navbar toggler */
+.navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-toggler:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 212, 170, 0.25);
+}
+
+/* Override accordion */
+.accordion-item {
+  background-color: var(--surface-color);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.accordion-button {
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: var(--surface-light);
+  color: var(--accent-color);
+}
+
+.accordion-button:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 212, 170, 0.25);
+}
+
+.accordion-button::after {
+  filter: invert(1);
+}
+
+.accordion-body {
+  color: var(--text-secondary);
+}
+
+/* Override offcanvas */
+.offcanvas {
+  background-color: var(--surface-color);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.offcanvas-header {
+  background-color: var(--surface-light);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.offcanvas-title {
+  color: var(--text-primary);
+}
+
+/* Override carousel */
+.carousel-indicators [data-bs-target] {
+  background-color: var(--text-muted);
+}
+
+.carousel-indicators .active {
+  background-color: var(--accent-color);
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  filter: invert(1);
+}
+
+/* Override figure */
+.figure-caption {
+  color: var(--text-muted);
+}
+
+/* Override code */
+code {
+  background-color: var(--surface-light);
+  color: var(--accent-color);
+}
+
+pre {
+  background-color: var(--surface-light);
+  color: var(--text-secondary);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Override blockquote */
+.blockquote {
+  border-left-color: var(--accent-color);
+}
+
+.blockquote-footer {
+  color: var(--text-muted);
+}
+
+/* Override hr */
+hr {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Override mark */
+mark {
+  background-color: var(--warning);
+  color: var(--gray-900);
+}
+
+/* Override small */
+small {
+  color: var(--text-muted);
+}
+
+/* Override kbd */
+kbd {
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Override samp */
+samp {
+  background-color: var(--surface-light);
+  color: var(--text-secondary);
+}
+
+/* Override var */
+var {
+  color: var(--accent-color);
+}
+
+/* Override abbr */
+abbr[title] {
+  border-bottom-color: var(--text-muted);
+}
+
+/* Override cite */
+cite {
+  color: var(--text-muted);
+}
+
+/* Override dfn */
+dfn {
+  color: var(--accent-color);
+}
+
+/* Override em */
+em {
+  color: var(--text-primary);
+}
+
+/* Override i */
+i {
+  color: inherit;
+}
+
+/* Override strong */
+strong {
+  color: var(--text-primary);
+}
+
+/* Override b */
+b {
+  color: var(--text-primary);
+}
+
+/* Override u */
+u {
+  border-bottom-color: var(--accent-color);
+}
+
+/* Override s */
+s {
+  color: var(--text-muted);
+}
+
+/* Override del */
+del {
+  color: var(--text-muted);
+}
+
+/* Override ins */
+ins {
+  background-color: var(--success);
+  color: var(--white);
+  text-decoration: none;
+}
+
+/* Override sub and sup */
+sub, sup {
+  color: var(--text-secondary);
+} 

@@ -1,4 +1,4 @@
-# DS6-2-Catalogo
+# DS7-Final
 Proyecto de Desarrollo de software 6 - Catalogo de productos x Categorias + App Movil
 
 # Catálogo de Productos - Sistema de Gestión

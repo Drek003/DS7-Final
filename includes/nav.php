@@ -1,22 +1,22 @@
 <aside class="sidebar-nav bg-dark d-flex flex-column p-3" style="width: 250px; min-height: 100vh; position: fixed; top: 0; left: 0; z-index: 1040;">
-    <a href="/DS6-2-Catalogo/index.php" class="navbar-brand mb-4 d-flex align-items-center text-white text-decoration-none">
+    <a href="/DS7-Final/index.php" class="navbar-brand mb-4 d-flex align-items-center text-white text-decoration-none">
         <i class="fas fa-store fa-lg me-2"></i>
         <span class="fs-4">Catálogo</span>
     </a>
     <hr class="text-secondary">
     <ul class="nav nav-pills flex-column mb-auto gap-1">
         <li class="nav-item">
-            <a href="/DS6-2-Catalogo/index.php" class="nav-link text-white">
+            <a href="/DS7-Final/index.php" class="nav-link text-white">
                 <i class="fas fa-home me-2"></i> Inicio
             </a>
         </li>
         <li>
-            <a href="/DS6-2-Catalogo/views/categories/index.php" class="nav-link text-white">
+            <a href="/DS7-Final/views/categories/index.php" class="nav-link text-white">
                 <i class="fas fa-tags me-2"></i> Categorías
             </a>
         </li>
         <li>
-            <a href="/DS6-2-Catalogo/views/products/index.php" class="nav-link text-white">
+            <a href="/DS7-Final/views/products/index.php" class="nav-link text-white">
                 <i class="fas fa-box me-2"></i> Productos
             </a>
         </li>
@@ -27,11 +27,11 @@
             </a>
             <div class="collapse" id="adminMenu">
                 <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ms-3">
-                    <li><a href="/DS6-2-Catalogo/views/categories/create.php" class="nav-link text-white"><i class="fas fa-plus me-2"></i> Nueva Categoría</a></li>
-                    <li><a href="/DS6-2-Catalogo/views/products/create.php" class="nav-link text-white"><i class="fas fa-plus me-2"></i> Nuevo Producto</a></li>
+                    <li><a href="/DS7-Final/views/categories/create.php" class="nav-link text-white"><i class="fas fa-plus me-2"></i> Nueva Categoría</a></li>
+                    <li><a href="/DS7-Final/views/products/create.php" class="nav-link text-white"><i class="fas fa-plus me-2"></i> Nuevo Producto</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a href="/DS6-2-Catalogo/views/categories/index.php" class="nav-link text-white"><i class="fas fa-edit me-2"></i> Gestionar Categorías</a></li>
-                    <li><a href="/DS6-2-Catalogo/views/products/index.php" class="nav-link text-white"><i class="fas fa-edit me-2"></i> Gestionar Productos</a></li>
+                    <li><a href="/DS7-Final/views/categories/index.php" class="nav-link text-white"><i class="fas fa-edit me-2"></i> Gestionar Categorías</a></li>
+                    <li><a href="/DS7-Final/views/products/index.php" class="nav-link text-white"><i class="fas fa-edit me-2"></i> Gestionar Productos</a></li>
                 </ul>
             </div>
         </li>
@@ -56,7 +56,7 @@
                 <strong>Rol:</strong> <?php echo ucfirst($_SESSION['role']); ?>
             </span></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="/DS6-2-Catalogo/views/auth/logout.php"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+            <li><a class="dropdown-item" href="/DS7-Final/views/auth/logout.php"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
         </ul>
     </div>
     <button class="btn btn-outline-secondary d-lg-none mt-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">

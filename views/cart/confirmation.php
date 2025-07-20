@@ -37,7 +37,13 @@ if (isset($_GET['invoice']) && !empty($_GET['invoice'])) {
             $checkout_info = [
                 'invoice_number' => $sale_info['invoice_number'],
                 'total' => $sale_info['invoice_total'],
-                'customer_name' => $sale_info['customer_name']
+                'customer_name' => $sale_info['customer_name'],
+                'customer_email' => $sale_info['customer_email'],
+                'customer_phone' => $sale_info['customer_phone'],
+                'payment_method' => $sale_info['payment_method'],
+                'subtotal' => $sale_info['total_amount'],
+                'tax_amount' => $sale_info['tax_amount'],
+                'shipping' => 0 // Se puede calcular si es necesario
             ];
         }
     } catch (Exception $e) {
@@ -405,13 +411,16 @@ function formatPrice($amount) {
                                     <span class="detail-value">
                                         <?php 
                                         $payment_methods = [
+                                            'credit_card' => 'Tarjeta de Crédito',
+                                            'paypal' => 'PayPal',
+                                            'cash_on_delivery' => 'Pago contra entrega',
                                             'efectivo' => 'Efectivo',
                                             'tarjeta_credito' => 'Tarjeta de Crédito',
                                             'tarjeta_debito' => 'Tarjeta de Débito',
                                             'transferencia' => 'Transferencia Bancaria',
                                             'cheque' => 'Cheque'
                                         ];
-                                        echo $payment_methods[$checkout_info['payment_method']] ?? 'No especificado';
+                                        echo $payment_methods[$checkout_info['payment_method']] ?? 'Método no especificado';
                                         ?>
                                     </span>
                                 </div>

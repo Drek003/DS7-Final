@@ -2,6 +2,9 @@
 require_once '../../config/config.php';
 require_once '../../config/database.php';
 
+// Establecer header JSON
+header('Content-Type: application/json');
+
 // Verificar que el usuario esté logueado
 if (!isLoggedIn()) {
     echo json_encode(['success' => false, 'message' => 'Debes iniciar sesión para agregar productos al carrito.']);
@@ -22,13 +25,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
     
-    // Verificar que el producto existe
-    $product_stmt = $db->prepare("SELECT id, name, price FROM products WHERE id = ?");
+    // Verificar que el producto existe y obtener el stock
+    $product_stmt = $db->prepare("SELECT id, name, price, stock FROM products WHERE id = ?");
     $product_stmt->execute([$product_id]);
     $product = $product_stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$product) {
         echo json_encode(['success' => false, 'message' => 'Producto no encontrado.']);
+        exit;
+    }
+    
+    // Verificar que hay stock disponible
+    if ($product['stock'] <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Producto sin stock disponible.']);
         exit;
     }
     
@@ -39,15 +48,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $existing_item = $check_stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($existing_item) {
-            // Actualizar cantidad existente (sin límite máximo)
+            // Calcular nueva cantidad total
             $new_quantity = $existing_item['quantity'] + $quantity;
             
+            // Verificar que no exceda el stock disponible
+            if ($new_quantity > $product['stock']) {
+                $available = $product['stock'] - $existing_item['quantity'];
+                if ($available <= 0) {
+                    echo json_encode(['success' => false, 'message' => 'Ya tienes el máximo disponible de este producto en tu carrito.']);
+                    exit;
+                } else {
+                    echo json_encode(['success' => false, 'message' => "Solo puedes agregar {$available} unidades más. Stock disponible: {$product['stock']}"]);
+                    exit;
+                }
+            }
+            
+            // Actualizar cantidad existente
             $update_stmt = $db->prepare("UPDATE shopping_cart SET quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
             $update_stmt->execute([$new_quantity, $existing_item['id']]);
             
             $message = 'Cantidad actualizada en el carrito.';
             $action = 'updated';
         } else {
+            // Verificar que la cantidad no exceda el stock para producto nuevo
+            if ($quantity > $product['stock']) {
+                echo json_encode(['success' => false, 'message' => "Cantidad solicitada ({$quantity}) excede el stock disponible ({$product['stock']})."]);
+                exit;
+            }
+            
             // Agregar nuevo producto al carrito
             $insert_stmt = $db->prepare("INSERT INTO shopping_cart (user_id, product_id, quantity, price_at_time) VALUES (?, ?, ?, ?)");
             $insert_stmt->execute([$user_id, $product_id, $quantity, $product['price']]);

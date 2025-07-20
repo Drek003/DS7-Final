@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="../../assets/css/custom.css" rel="stylesheet">
     <link href="../../assets/css/catg.css" rel="stylesheet">
     <link href="../../assets/css/bootstrap-dark.css" rel="stylesheet">
-    <style>body {overflow-y: auto !important;}</style>
+    <link href="../../assets/css/customers.css" rel="stylesheet">
 </head>
 <body>
     <?php include '../../includes/nav.php'; ?>

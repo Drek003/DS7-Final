@@ -45,29 +45,7 @@ if (!$customer) {
     <link href="../../assets/css/custom.css" rel="stylesheet">
     <link href="../../assets/css/catg.css" rel="stylesheet">
     <link href="../../assets/css/bootstrap-dark.css" rel="stylesheet">
-    <style>
-        body {overflow-y: auto !important;}
-        .info-item {
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding: 1rem 0;
-        }
-        .info-item:last-child {
-            border-bottom: none;
-        }
-        .info-label {
-            font-weight: 600;
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-        .info-value {
-            margin-top: 0.25rem;
-            font-size: 1rem;
-        }
-        .customer-header {
-            background: linear-gradient(135deg, var(--accent-color, #00d4aa) 0%, var(--primary-color, #1a1a2e) 100%);
-            color: white;
-        }
-    </style>
+    <link href="../../assets/css/customers.css" rel="stylesheet">
 </head>
 <body>
     <?php include '../../includes/nav.php'; ?>

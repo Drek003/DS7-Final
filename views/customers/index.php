@@ -60,16 +60,7 @@ $stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
     <link href="../../assets/css/custom.css" rel="stylesheet">
     <link href="../../assets/css/catg.css" rel="stylesheet">
     <link href="../../assets/css/bootstrap-dark.css" rel="stylesheet">
-    <style>
-        body {overflow-y: auto !important;}
-        .customer-card:hover {
-            transform: translateY(-2px);
-            transition: all 0.3s ease;
-        }
-        .customer-type-badge {
-            font-size: 0.75em;
-        }
-    </style>
+    <link href="../../assets/css/customers.css" rel="stylesheet">
 </head>
 <body>
     <?php include '../../includes/nav.php'; ?>

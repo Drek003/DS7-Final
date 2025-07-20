@@ -684,6 +684,7 @@ function formatPrice($amount) {
                             <input type="hidden" name="customer_name" id="customer_name">
                             <input type="hidden" name="customer_email" id="customer_email">
                             <input type="hidden" name="customer_phone" id="customer_phone">
+                            <input type="hidden" name="payment_method" id="customer_payment_method">
                             <input type="hidden" name="notes" id="notes">
                             
                             <div class="checkout-form">
@@ -710,7 +711,7 @@ function formatPrice($amount) {
                                             </div>
                                             <div class="col-12">
                                                 <label for="phone" class="form-label">Teléfono *</label>
-                                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                                                <input type="tel" class="form-control" id="phone" name="phone" required maxlength="8" placeholder="65982118">
                                             </div>
                                             <div class="col-12">
                                                 <label for="address" class="form-label">Dirección *</label>
@@ -1050,6 +1051,25 @@ function formatPrice($amount) {
                             return false;
                         }
                     }
+                    
+                    // Validación específica de email
+                    const email = document.getElementById('email');
+                    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    if (!emailRegex.test(email.value)) {
+                        email.focus();
+                        showError('Por favor, ingresa un correo electrónico válido (ejemplo: usuario@dominio.com)');
+                        return false;
+                    }
+                    
+                    // Validación específica de teléfono (exactamente 8 dígitos)
+                    const phone = document.getElementById('phone');
+                    const phoneRegex = /^\d{8}$/;
+                    if (!phoneRegex.test(phone.value)) {
+                        phone.focus();
+                        showError('El teléfono debe tener exactamente 8 dígitos (ejemplo: 65982118)');
+                        return false;
+                    }
+                    
                     return true;
 
                 case 2:
@@ -1214,10 +1234,12 @@ function formatPrice($amount) {
                 const email = document.getElementById('email').value;
                 const phone = document.getElementById('phone').value;
                 const comments = document.getElementById('comments').value;
+                const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
                 
                 document.getElementById('customer_name').value = `${firstName} ${lastName}`;
                 document.getElementById('customer_email').value = email;
                 document.getElementById('customer_phone').value = phone;
+                document.getElementById('customer_payment_method').value = paymentMethod ? paymentMethod.value : '';
                 document.getElementById('notes').value = comments;
                 
                 // El formulario se enviará normalmente al process_checkout.php

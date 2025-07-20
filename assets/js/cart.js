@@ -1,23 +1,98 @@
 // Funciones del carrito de compras
 
+// Función simple de respaldo para agregar al carrito
+function simpleAddToCart(productId, quantity = 1, button) {
+    console.log('🔧 Función simple activada');
+    
+    if (!button) return;
+    
+    const originalText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
+    
+    setTimeout(() => {
+        button.innerHTML = '<i class="fas fa-check"></i> ¡Agregado!';
+        button.style.backgroundColor = '#28a745';
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.style.backgroundColor = '';
+            button.disabled = false;
+        }, 1500);
+    }, 500);
+}
+
 // Agregar producto al carrito con animación
 function addToCartWithAnimation(productId, quantity = 1, button) {
-    // Deshabilitar botón temporalmente
-    if (button) {
-        button.disabled = true;
-        const originalText = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
+    console.log('🛒 Iniciando función addToCart');
+    
+    if (!button) {
+        console.error('❌ No se proporcionó el botón');
+        return;
     }
-
-    window.addToCart(productId, quantity);
-
-    // Restaurar botón después de un momento
-    if (button) {
+    
+    // Guardar estado original del botón
+    const originalText = button.innerHTML;
+    const originalClasses = button.className;
+    
+    // Deshabilitar botón y mostrar estado de carga
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
+    
+    console.log('🎯 Cambiando a estado de éxito INMEDIATAMENTE');
+    
+    // Cambiar inmediatamente a estado de éxito (sin esperar AJAX)
+    setTimeout(() => {
+        button.innerHTML = '<i class="fas fa-check"></i> ¡Producto Agregado!';
+        button.className = button.className.replace('btn-primary', 'btn-success');
+        
+        // Hacer la petición AJAX en segundo plano
+        submitToBackend(productId, quantity);
+        
+        // Restaurar botón después de 2 segundos
         setTimeout(() => {
-            button.disabled = false;
             button.innerHTML = originalText;
-        }, 1500);
+            button.className = originalClasses;
+            button.disabled = false;
+        }, 2000);
+        
+    }, 500); // Solo esperar 500ms antes de mostrar éxito
+}
+
+// Función para hacer la petición AJAX en segundo plano
+function submitToBackend(productId, quantity) {
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('quantity', quantity);
+    
+    // Determinar la ruta correcta
+    let cartPath = '../cart/add_to_cart.php';
+    if (window.location.pathname.includes('/cart/')) {
+        cartPath = 'add_to_cart.php';
+    } else if (window.location.pathname.includes('/products/')) {
+        cartPath = '../cart/add_to_cart.php';
+    } else {
+        cartPath = './views/cart/add_to_cart.php';
     }
+    
+    console.log('📡 Enviando petición en segundo plano a:', cartPath);
+    
+    fetch(cartPath, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('✅ Respuesta del servidor:', data);
+        
+        // Actualizar contador del carrito si existe
+        if (data.success && window.updateCartCount) {
+            window.updateCartCount(true);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error en segundo plano:', error);
+    });
 }
 
 // Función para mostrar detalles rápidos del producto
@@ -55,29 +130,69 @@ function validateQuantityAndAdd(productId, quantityInput, button) {
 
 // Actualizar cantidad en el carrito
 function updateCartQuantity(cartId, quantity) {
-    if (quantity < 1 || quantity > 99) {
-        showMessage('La cantidad debe estar entre 1 y 99', 'error');
+    if (quantity < 1) {
+        showMessage('La cantidad debe ser al menos 1', 'error');
         return;
     }
 
     const formData = new FormData();
-    formData.append('action', 'update_quantity');
     formData.append('cart_id', cartId);
     formData.append('quantity', quantity);
 
-    fetch('/DS7-Final/views/cart/index.php', {
+    // Usar el endpoint específico para actualizar cantidad con validación de stock
+    fetch('update_quantity.php', {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (response.ok) {
-            location.reload(); // Recargar la página para mostrar cambios
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar la interfaz sin recargar la página
+            updateCartDisplay(data);
+            showMessage(data.message, 'success');
+        } else {
+            showMessage(data.message, 'error');
+            // Si hay error de stock, restaurar la cantidad anterior
+            location.reload();
         }
     })
     .catch(error => {
         console.error('Error updating quantity:', error);
         showMessage('Error al actualizar la cantidad', 'error');
+        location.reload();
     });
+}
+
+// Función para actualizar la interfaz del carrito
+function updateCartDisplay(data) {
+    // Actualizar el subtotal
+    const subtotalElement = document.querySelector('#cart-subtotal');
+    if (subtotalElement) {
+        subtotalElement.textContent = data.subtotal_formatted;
+    }
+    
+    // Actualizar el impuesto
+    const taxElement = document.querySelector('#cart-tax');
+    if (taxElement) {
+        taxElement.textContent = data.tax_formatted;
+    }
+    
+    // Actualizar el envío
+    const shippingElement = document.querySelector('#cart-shipping');
+    if (shippingElement) {
+        shippingElement.textContent = data.shipping_formatted;
+    }
+    
+    // Actualizar el total
+    const totalElement = document.querySelector('#cart-total');
+    if (totalElement) {
+        totalElement.textContent = data.total_formatted;
+    }
+    
+    // Actualizar contador de items si existe
+    if (window.updateCartCount && data.total_items) {
+        window.updateCartCount(false, data.total_items);
+    }
 }
 
 // Remover item del carrito con confirmación

@@ -130,6 +130,20 @@ if ($product['category_id']) {
                         </div>
                         
                         <!-- Botones de acción -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <label for="quantity" class="form-label me-3 mb-0">Cantidad:</label>
+                                    <input type="number" id="quantity" class="form-control" style="width: 80px;" 
+                                           value="1" min="1" max="99">
+                                </div>
+                                <button class="btn btn-success btn-lg w-100 btn-add-to-cart" 
+                                        onclick="addToCartWithAnimation(<?php echo $product['id']; ?>, document.getElementById('quantity').value, this)">
+                                    <i class="fas fa-shopping-cart"></i> Agregar al Carrito
+                                </button>
+                            </div>
+                        </div>
+                        
                         <div class="d-flex gap-2 flex-wrap">
                             <a href="index.php" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Volver al catálogo
@@ -196,6 +210,8 @@ if ($product['category_id']) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/js/app.js"></script>
+    <script src="../../assets/js/cart.js"></script>
     <script>
         <?php if (isAdmin()): ?>
         function deleteProduct(id, name) {

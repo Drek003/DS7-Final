@@ -11,6 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     redirect('index.php');
 }
 
+// Validar que se hayan enviado los datos requeridos
+$required_fields = ['customer_name', 'customer_email', 'customer_phone', 'payment_method'];
+foreach ($required_fields as $field) {
+    if (empty($_POST[$field])) {
+        $_SESSION['checkout_error'] = 'Faltan datos requeridos para procesar el pedido.';
+        redirect('checkout.php');
+    }
+}
+
 $database = new Database();
 $db = $database->getConnection();
 

@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Obtener productos del carrito
+// Obtener productos del carrito con información de stock
 $cart_query = "
     SELECT 
         sc.id as cart_id,
@@ -491,31 +491,62 @@ function formatPrice($amount) {
             outline: 2px solid var(--accent-color);
             outline-offset: 2px;
         }
+
+        /* Estilos para alertas de stock */
+        .stock-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+        }
+
+        .stock-info {
+            background-color: rgba(108, 117, 125, 0.1);
+            border: 1px solid rgba(108, 117, 125, 0.3);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+        }
+
+        /* Animación para stock bajo */
+        .stock-warning {
+            animation: pulse-warning 2s infinite;
+        }
+
+        @keyframes pulse-warning {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
     </style>
 </head>
 <body class="cart-container">
     <?php include '../../includes/nav.php'; ?>
 
-    <div class="container-fluid py-4">
-        <div class="row justify-content-center">
-            <div class="col-12 col-xl-11">
-                <!-- Encabezado del carrito -->
-                <div class="cart-header">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-                        <div class="mb-3 mb-md-0">
-                            <h1 class="mb-2">
-                                <i class="fas fa-shopping-cart me-2"></i> 
-                                Mi Carrito de Compras
-                            </h1>
-                            <p class="text-muted mb-0">Revisa y gestiona los productos en tu carrito</p>
-                        </div>
-                        <div>
-                            <a href="../products/index.php" class="btn btn-outline-primary btn-cart-action">
-                                <i class="fas fa-arrow-left me-2"></i> Seguir Comprando
-                            </a>
-                        </div>
-                    </div>
-                </div>
+        <div class="container mt-4">
+        <?php if (isset($message)): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i><?= htmlspecialchars($message) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i><?= htmlspecialchars($error) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
+
+        <div class="row">
+            <div class="col-md-8">
+                <h1 class="mb-4">
+                    <i class="bi bi-cart3 me-2"></i>Mi Carrito de Compras
+                </h1>
 
                 <!-- Mensajes de estado -->
                 <?php if ($message): ?>
@@ -620,24 +651,33 @@ function formatPrice($amount) {
                                         <small class="text-muted d-block">Cantidad</small>
                                         <div class="quantity-controls">
                                             <button type="button" class="quantity-btn" 
-                                                    onclick="changeQuantity(<?php echo $item['cart_id']; ?>, -1)" 
+                                                    onclick="changeQuantity(<?php echo $item['cart_id']; ?>, -1, <?php echo $item['quantity']; ?>)" 
                                                     <?php echo $item['quantity'] <= 1 ? 'disabled' : ''; ?>
                                                     aria-label="Disminuir cantidad">
                                                 <i class="fas fa-minus"></i>
                                             </button>
-                                            <span class="quantity-display" id="quantity-<?php echo $item['cart_id']; ?>"><?php echo $item['quantity']; ?></span>
+                                            <span class="quantity-display"><?php echo $item['quantity']; ?></span>
                                             <button type="button" class="quantity-btn" 
-                                                    onclick="changeQuantity(<?php echo $item['cart_id']; ?>, 1)" 
+                                                    onclick="changeQuantity(<?php echo $item['cart_id']; ?>, 1, <?php echo $item['quantity']; ?>)" 
                                                     <?php echo $item['quantity'] >= $item['stock'] ? 'disabled' : ''; ?>
-                                                    aria-label="Aumentar cantidad"
-                                                    title="<?php echo $item['quantity'] >= $item['stock'] ? 'Stock máximo alcanzado' : 'Aumentar cantidad'; ?>">
+                                                    <?php if ($item['quantity'] >= $item['stock']): ?>
+                                                    title="Stock máximo: <?php echo $item['stock']; ?> unidades"
+                                                    data-bs-toggle="tooltip"
+                                                    <?php endif; ?>
+                                                    aria-label="Aumentar cantidad">
                                                 <i class="fas fa-plus"></i>
                                             </button>
                                         </div>
-                                        <small class="text-muted d-block mt-1">
-                                            Stock disponible: <?php echo ($item['stock'] - $item['quantity']); ?> 
-                                            (Total: <?php echo $item['stock']; ?>)
+                                        <?php if ($item['stock'] <= 5): ?>
+                                        <small class="text-warning mt-1 d-block">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Solo quedan <?php echo $item['stock']; ?> en stock
                                         </small>
+                                        <?php else: ?>
+                                        <small class="text-muted mt-1 d-block">
+                                            Stock: <?php echo $item['stock']; ?> disponibles
+                                        </small>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
 
@@ -772,33 +812,35 @@ function formatPrice($amount) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../../assets/js/app.js"></script>
     <script>
-        // Función simple para cambiar cantidad
-        function changeQuantity(cartId, change) {
-            // Buscar el display de cantidad por cartId
-            const quantityDisplay = document.querySelector(`#quantity-${cartId}`);
-            if (!quantityDisplay) {
-                console.error('No se encontró el display de cantidad para cart ID:', cartId);
-                return;
-            }
-            
-            // Obtener la cantidad actual del DOM
-            const currentQuantity = parseInt(quantityDisplay.textContent) || 1;
+        // Función mejorada para cambiar cantidad con validación de stock
+        function changeQuantity(cartId, change, currentQuantity) {
             const newQuantity = currentQuantity + change;
             
-            // Validación básica - solo mínimo 1
-            if (newQuantity <= 0) {
+            // Validaciones básicas
+            if (newQuantity < 1) {
                 showNotification('La cantidad mínima es 1', 'warning');
                 return;
             }
             
-            // Deshabilitar botones temporalmente
+            // Deshabilitar botones temporalmente para evitar clics múltiples
             const buttons = document.querySelectorAll(`[onclick*="${cartId}"]`);
             buttons.forEach(btn => btn.disabled = true);
             
+            // Mostrar indicador de carga
+            const quantityDisplay = event.target.closest('.quantity-controls').querySelector('.quantity-display');
             const originalText = quantityDisplay.textContent;
             quantityDisplay.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             
-            // Enviar al servidor
+            // Mostrar indicador de actualización en los totales
+            const summaryElements = ['.cart-subtotal', '.cart-tax', '.cart-shipping', '.cart-total'];
+            summaryElements.forEach(selector => {
+                const element = document.querySelector(selector);
+                if (element) {
+                    element.classList.add('updating');
+                }
+            });
+            
+            // Enviar actualización al servidor usando el nuevo endpoint
             const formData = new FormData();
             formData.append('cart_id', cartId);
             formData.append('quantity', newQuantity);
@@ -810,100 +852,154 @@ function formatPrice($amount) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Actualizar cantidad
-                    quantityDisplay.textContent = newQuantity;
+                    // Actualizar la cantidad en la pantalla
+                    quantityDisplay.textContent = data.new_quantity;
                     
-                    // Actualizar totales
-                    updateCartDisplayFromData(data);
+                    // Actualizar totales con los datos del servidor
+                    updateCartTotalsFromData(data);
                     
-                    // Actualizar botones con validación simple
-                    updateButtonsSimple(cartId, newQuantity, data.current_stock);
+                    // Mostrar notificación de éxito con información de stock
+                    let message = 'Cantidad actualizada correctamente';
+                    if (data.stock_remaining !== undefined) {
+                        message += ` (${data.stock_remaining} unidades restantes)`;
+                    }
+                    showNotification(message, 'success');
                     
-                    showNotification(data.message, 'success');
+                    // Actualizar contador del carrito
+                    if (window.updateCartCount) {
+                        window.updateCartCount(true);
+                    }
+                    
+                    // Actualizar botones según stock disponible
+                    updateQuantityButtons(cartId, data.new_quantity, data.stock_remaining + data.new_quantity);
+                    
                 } else {
-                    // Restaurar cantidad original si hay error
+                    // Error del servidor - restaurar cantidad original
                     quantityDisplay.textContent = originalText;
-                    showNotification(data.message, 'error');
+                    
+                    // Mostrar mensaje de error específico
+                    showNotification(data.message || 'Error al actualizar la cantidad', 'danger');
+                    
+                    // Si hay información de stock máximo, actualizar botones
+                    if (data.max_stock !== undefined) {
+                        updateQuantityButtons(cartId, currentQuantity, data.max_stock);
+                    }
                 }
+                
+                // Remover indicadores de actualización
+                summaryElements.forEach(selector => {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        element.classList.remove('updating');
+                        if (data.success) {
+                            element.classList.add('updated');
+                            setTimeout(() => {
+                                element.classList.remove('updated');
+                            }, 600);
+                        }
+                    }
+                });
             })
             .catch(error => {
                 console.error('Error:', error);
                 quantityDisplay.textContent = originalText;
-                showNotification('Error al actualizar la cantidad', 'error');
+                showNotification('Error de conexión al actualizar la cantidad', 'danger');
+                
+                // Remover indicadores de actualización en caso de error
+                summaryElements.forEach(selector => {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        element.classList.remove('updating');
+                    }
+                });
             })
             .finally(() => {
-                // Rehabilitar botones
-                buttons.forEach(btn => btn.disabled = false);
+                // Rehabilitar botones después de un breve delay
+                setTimeout(() => {
+                    buttons.forEach(btn => btn.disabled = false);
+                }, 500);
             });
         }
-        
-        // Función simple para actualizar botones
-        function updateButtonsSimple(cartId, quantity, totalStock) {
-            const decreaseBtn = document.querySelector(`[onclick*="${cartId}, -1"]`);
-            const increaseBtn = document.querySelector(`[onclick*="${cartId}, 1"]`);
-            const stockInfo = increaseBtn ? increaseBtn.closest('.col-6').querySelector('small:last-child') : null;
+
+        // Función para actualizar botones de cantidad según stock disponible
+        function updateQuantityButtons(cartId, currentQuantity, maxStock) {
+            const buttons = document.querySelectorAll(`[onclick*="${cartId}"]`);
+            buttons.forEach(btn => {
+                const onclick = btn.getAttribute('onclick');
+                
+                // Botón de disminuir
+                if (onclick.includes(', -1,')) {
+                    btn.disabled = currentQuantity <= 1;
+                }
+                
+                // Botón de aumentar
+                if (onclick.includes(', 1,')) {
+                    btn.disabled = currentQuantity >= maxStock;
+                    
+                    // Agregar tooltip si está en el límite
+                    if (currentQuantity >= maxStock) {
+                        btn.setAttribute('title', `Stock máximo: ${maxStock} unidades`);
+                        btn.setAttribute('data-bs-toggle', 'tooltip');
+                    } else {
+                        btn.removeAttribute('title');
+                        btn.removeAttribute('data-bs-toggle');
+                    }
+                }
+            });
+        }
+
+        // Función para actualizar totales con datos del servidor
+        function updateCartTotalsFromData(data) {
+            const subtotalElement = document.querySelector('.cart-subtotal');
+            const taxElement = document.querySelector('.cart-tax');
+            const shippingElement = document.querySelector('.cart-shipping');
+            const totalElement = document.querySelector('.cart-total');
+            const itemsTextElement = document.querySelector('.cart-items-text');
+            const shippingRowElement = document.querySelector('.cart-shipping-row');
             
-            // Botón disminuir: disabled si quantity <= 1
-            if (decreaseBtn) {
-                decreaseBtn.disabled = quantity <= 1;
+            if (subtotalElement) {
+                subtotalElement.textContent = data.subtotal_formatted;
+                animateElement(subtotalElement);
             }
             
-            // Botón aumentar: disabled si quantity >= totalStock
-            if (increaseBtn) {
-                increaseBtn.disabled = quantity >= totalStock;
-                increaseBtn.title = quantity >= totalStock ? 'Stock máximo alcanzado' : 'Aumentar cantidad';
+            if (taxElement) {
+                taxElement.textContent = data.tax_formatted;
+                animateElement(taxElement);
             }
             
-            // Actualizar información de stock
-            if (stockInfo) {
-                const remaining = totalStock - quantity;
-                if (remaining <= 0) {
-                    stockInfo.className = 'text-warning d-block mt-1';
-                    stockInfo.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Stock máximo alcanzado';
+            if (shippingElement) {
+                shippingElement.textContent = data.shipping_formatted;
+                
+                // Actualizar color y texto del envío según si es gratuito o no
+                const shippingSpan = shippingRowElement.querySelector('span:first-child');
+                if (data.shipping === 0) {
+                    shippingSpan.className = 'text-success';
+                    shippingSpan.innerHTML = '<i class="fas fa-truck me-1"></i>Envío gratuito';
+                    shippingElement.className = 'text-success fw-semibold cart-shipping';
                 } else {
-                    stockInfo.className = 'text-muted d-block mt-1';
-                    stockInfo.textContent = `Stock disponible: ${remaining} (Total: ${totalStock})`;
+                    shippingSpan.className = 'text-muted';
+                    shippingSpan.innerHTML = '<i class="fas fa-truck me-1"></i>Envío';
+                    shippingElement.className = 'fw-semibold cart-shipping';
                 }
             }
-        }
-        
-        // Función para actualizar la interfaz con los datos del servidor
-        function updateCartDisplayFromData(data) {
-            // Actualizar subtotal
-            const subtotalElement = document.querySelector('.cart-subtotal');
-            if (subtotalElement && data.subtotal_formatted) {
-                subtotalElement.textContent = data.subtotal_formatted;
-            }
             
-            // Actualizar impuesto
-            const taxElement = document.querySelector('.cart-tax');
-            if (taxElement && data.tax_formatted) {
-                taxElement.textContent = data.tax_formatted;
-            }
-            
-            // Actualizar envío
-            const shippingElement = document.querySelector('.cart-shipping');
-            if (shippingElement && data.shipping_formatted) {
-                shippingElement.textContent = data.shipping_formatted;
-            }
-            
-            // Actualizar total
-            const totalElement = document.querySelector('.cart-total');
-            if (totalElement && data.total_formatted) {
+            if (totalElement) {
                 totalElement.textContent = data.total_formatted;
+                animateElement(totalElement, 1.1, 300);
             }
             
-            // Actualizar contador de items
-            const itemsText = document.querySelector('.cart-items-text');
-            if (itemsText && data.total_items) {
-                const items = data.total_items;
-                itemsText.textContent = `Subtotal (${items} ${items == 1 ? 'producto' : 'productos'})`;
+            if (itemsTextElement) {
+                const productText = data.total_items === 1 ? 'producto' : 'productos';
+                itemsTextElement.textContent = `Subtotal (${data.total_items} ${productText})`;
             }
-            
-            // Actualizar contador del carrito global si existe
-            if (window.updateCartCount && data.total_items) {
-                window.updateCartCount(false, data.total_items);
-            }
+        }
+
+        // Función auxiliar para animar elementos
+        function animateElement(element, scale = 1.05, duration = 200) {
+            element.style.transform = `scale(${scale})`;
+            setTimeout(() => {
+                element.style.transform = 'scale(1)';
+            }, duration);
         }
 
         // Función para actualizar totales dinámicamente

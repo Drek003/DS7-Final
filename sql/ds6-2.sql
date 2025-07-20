@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 25-06-2025 a las 04:31:32
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Tiempo de generación: 20-07-2025 a las 19:30:49
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,6 +20,40 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `ds6-2`
 --
+
+DELIMITER $$
+--
+-- Funciones
+--
+CREATE DEFINER=`root`@`localhost` FUNCTION `get_next_invoice_number` () RETURNS VARCHAR(50) CHARSET utf8mb4 COLLATE utf8mb4_general_ci DETERMINISTIC READS SQL DATA BEGIN
+    DECLARE next_number INT;
+    DECLARE current_year INT;
+    DECLARE invoice_num VARCHAR(50);
+    
+    SET current_year = YEAR(CURDATE());
+    
+    -- Obtener o crear secuencia para el año actual
+    INSERT INTO invoice_sequence (year, last_number) 
+    VALUES (current_year, 0)
+    ON DUPLICATE KEY UPDATE last_number = last_number;
+    
+    -- Incrementar el número
+    UPDATE invoice_sequence 
+    SET last_number = last_number + 1 
+    WHERE year = current_year;
+    
+    -- Obtener el nuevo número
+    SELECT last_number INTO next_number 
+    FROM invoice_sequence 
+    WHERE year = current_year;
+    
+    -- Formatear el número de factura
+    SET invoice_num = CONCAT('INV-', current_year, '-', LPAD(next_number, 3, '0'));
+    
+    RETURN invoice_num;
+END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -50,6 +84,113 @@ INSERT INTO `categories` (`id`, `name`, `description`, `image`, `created_at`) VA
 (8, 'Accesorios y Periféricos', 'Teclados, mouse, monitores, webcams, bases para laptop, hubs USB', 'https://megatecno.com.ve/wp-content/uploads/2025/04/Comprar-Perifericos-para-PC-en-Venezuela-%E2%80%93-Accesorios-y-Dispositivos-Externos.png', '2025-05-30 19:17:20'),
 (9, 'Smart Home', 'Dispositivos inteligentes para el hogar, asistentes de voz, cámaras de seguridad, domótica', 'https://www.beachesliving.ca/beacheslife/wp-content/uploads/2018/03/apple-homepod-google-home-amazon-echo.png', '2025-05-30 19:17:20'),
 (10, 'Wearables y Fitness', 'Smartwatches, fitness trackers, auriculares deportivos, dispositivos de salud', 'https://dy6o3vurind23.cloudfront.net/img/developerimg/choco_life_20161214074908_db/mebase/CustomSectionStyle/Images/smart_wearabldsses.webp', '2025-05-30 19:17:20');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `customers`
+--
+
+CREATE TABLE `customers` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `city` varchar(50) DEFAULT NULL,
+  `country` varchar(50) DEFAULT 'Panamá',
+  `tax_id` varchar(50) DEFAULT NULL,
+  `customer_type` enum('individual','empresa') DEFAULT 'individual',
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `customers`
+--
+
+INSERT INTO `customers` (`id`, `name`, `email`, `password`, `phone`, `address`, `city`, `country`, `tax_id`, `customer_type`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 'Juan Pérez', 'juan.perez@email.com', 'cliente123', '+507 6123-4567', 'Calle 50, Edificio Plaza 2000, Piso 15', 'Ciudad de Panamá', 'Panamá', NULL, 'individual', 'Cliente frecuente - Descuentos aplicables', '2025-07-20 13:55:42', '2025-07-20 16:06:05'),
+(2, 'María González', 'maria.gonzalez@email.com', 'maria2024', '+507 6234-5678', 'Vía España, Centro Comercial El Dorado', 'Ciudad de Panamá', 'Panamá', NULL, 'individual', 'Prefiere pago en efectivo', '2025-07-20 13:55:42', '2025-07-20 16:06:05'),
+(3, 'Carlos Rodríguez', 'carlos.rodriguez@email.com', 'carlos456', '+507 6345-6789', 'Av. Balboa, Torre de las Américas', 'Ciudad de Panamá', 'Panamá', NULL, 'individual', 'Ejecutivo de empresa tecnológica', '2025-07-20 13:55:42', '2025-07-20 16:06:05'),
+(4, 'Tecno-Y', 'tecnoY@gmail.com', 'tecno2024', '+50768382443', 'Mi casa en el cerro Canajagua', 'Panamá', 'Panamá', '8-991-1598', 'empresa', 'Cliente frecuente.', '2025-07-20 15:36:17', '2025-07-20 16:06:05'),
+(5, 'Empresas Épsilon', 'adrianalbertojimenez@gmail.com', 'epsilon123', '+50768382443', 'Empresas Épsilon, chorrera, junto al pio pio', 'Panamá', 'Panamá', '4-713-434', 'empresa', 'Empresa del Lic. Adrian Jimenez M.', '2025-07-20 15:40:13', '2025-07-20 16:23:30');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `invoices`
+--
+
+CREATE TABLE `invoices` (
+  `id` int(11) NOT NULL,
+  `sale_id` int(11) NOT NULL,
+  `invoice_number` varchar(50) NOT NULL,
+  `invoice_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `due_date` datetime DEFAULT NULL,
+  `subtotal` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `tax_rate` decimal(5,2) DEFAULT 7.00,
+  `tax_amount` decimal(10,2) DEFAULT 0.00,
+  `discount_amount` decimal(10,2) DEFAULT 0.00,
+  `total_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `invoice_status` enum('borrador','enviada','pagada','vencida','cancelada') DEFAULT 'borrador',
+  `payment_terms` varchar(100) DEFAULT 'Pago inmediato',
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `invoices`
+--
+
+INSERT INTO `invoices` (`id`, `sale_id`, `invoice_number`, `invoice_date`, `due_date`, `subtotal`, `tax_rate`, `tax_amount`, `discount_amount`, `total_amount`, `invoice_status`, `payment_terms`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 1, 'INV-2025-001', '2025-07-20 13:55:42', NULL, 1324.97, 7.00, 95.40, 0.00, 1420.37, 'pagada', 'Pago inmediato', 'Factura pagada con tarjeta de crédito', '2025-07-20 13:55:42', '2025-07-20 13:55:42'),
+(2, 2, 'INV-2025-002', '2025-07-20 13:55:42', NULL, 899.99, 7.00, 64.80, 50.00, 914.79, 'pagada', 'Pago inmediato', 'Descuento aplicado - Cliente frecuente', '2025-07-20 13:55:42', '2025-07-20 13:55:42'),
+(3, 3, 'INV-2025-003', '2025-07-20 13:55:42', NULL, 209.98, 7.00, 15.12, 0.00, 225.10, 'enviada', 'Pago a 15 días', 'Pendiente de pago por transferencia', '2025-07-20 13:55:42', '2025-07-20 13:55:42');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `invoice_sequence`
+--
+
+CREATE TABLE `invoice_sequence` (
+  `id` int(11) NOT NULL,
+  `year` int(4) NOT NULL,
+  `last_number` int(11) NOT NULL DEFAULT 0,
+  `prefix` varchar(10) DEFAULT 'INV',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `invoice_sequence`
+--
+
+INSERT INTO `invoice_sequence` (`id`, `year`, `last_number`, `prefix`, `created_at`, `updated_at`) VALUES
+(1, 2025, 3, 'INV', '2025-07-20 13:55:42', '2025-07-20 13:55:42');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura Stand-in para la vista `pending_invoices`
+-- (Véase abajo para la vista actual)
+--
+CREATE TABLE `pending_invoices` (
+`id` int(11)
+,`invoice_number` varchar(50)
+,`invoice_date` datetime
+,`due_date` datetime
+,`total_amount` decimal(10,2)
+,`invoice_status` enum('borrador','enviada','pagada','vencida','cancelada')
+,`customer_name` varchar(100)
+,`customer_email` varchar(100)
+,`customer_phone` varchar(20)
+,`days_overdue` int(7)
+);
 
 -- --------------------------------------------------------
 
@@ -129,86 +270,6 @@ INSERT INTO `products` (`id`, `name`, `description`, `price`, `stock`, `image`, 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `users`
---
-
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` enum('admin','consultor') DEFAULT 'consultor',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `users`
---
-
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `created_at`) VALUES
-(1, 'admin_tech', 'admin@codecorp.com', 'admin123', 'admin', '2025-05-30 19:37:03'),
-(2, 'consultor_V', 'consultor@codecorp.com', 'con123', 'consultor', '2025-05-30 19:37:03');
-
---
--- Índices para tablas volcadas
---
-
---
--- Indices de la tabla `categories`
---
-ALTER TABLE `categories`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indices de la tabla `products`
---
-ALTER TABLE `products`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `category_id` (`category_id`);
-
---
--- Indices de la tabla `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
-
---
--- AUTO_INCREMENT de las tablas volcadas
---
-
---
--- AUTO_INCREMENT de la tabla `categories`
---
-ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
---
--- AUTO_INCREMENT de la tabla `products`
---
-ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
-
---
--- AUTO_INCREMENT de la tabla `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- Restricciones para tablas volcadas
---
-
---
--- Filtros para la tabla `products`
---
-ALTER TABLE `products`
-  ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`);
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `sales`
 --
 
@@ -235,10 +296,31 @@ CREATE TABLE `sales` (
 -- Volcado de datos para la tabla `sales`
 --
 
-INSERT INTO `sales` (`id`, `user_id`, `customer_name`, `customer_email`, `customer_phone`, `total_amount`, `tax_amount`, `discount_amount`, `final_amount`, `payment_method`, `payment_status`, `notes`, `invoice_number`) VALUES
-(1, 1, 'Juan Pérez', 'juan.perez@email.com', '+507 6123-4567', 1324.97, 95.40, 0.00, 1420.37, 'tarjeta_credito', 'pagado', 'Venta de laptop MacBook Air M2 y accesorios', 'INV-2025-001'),
-(2, 1, 'María González', 'maria.gonzalez@email.com', '+507 6234-5678', 899.99, 64.80, 50.00, 914.79, 'efectivo', 'pagado', 'Descuento por cliente frecuente', 'INV-2025-002'),
-(3, 2, 'Carlos Rodríguez', 'carlos.rodriguez@email.com', '+507 6345-6789', 209.98, 15.12, 0.00, 225.10, 'transferencia', 'pendiente', 'Pago pendiente por transferencia', 'INV-2025-003');
+INSERT INTO `sales` (`id`, `user_id`, `customer_name`, `customer_email`, `customer_phone`, `sale_date`, `total_amount`, `tax_amount`, `discount_amount`, `final_amount`, `payment_method`, `payment_status`, `notes`, `invoice_number`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Juan Pérez', 'juan.perez@email.com', '+507 6123-4567', '2025-07-20 13:55:42', 1324.97, 95.40, 0.00, 1420.37, 'tarjeta_credito', 'pagado', 'Venta de laptop MacBook Air M2 y accesorios', 'INV-2025-001', '2025-07-20 13:55:42', '2025-07-20 13:55:42'),
+(2, 1, 'María González', 'maria.gonzalez@email.com', '+507 6234-5678', '2025-07-20 13:55:42', 899.99, 64.80, 50.00, 914.79, 'efectivo', 'pagado', 'Descuento por cliente frecuente', 'INV-2025-002', '2025-07-20 13:55:42', '2025-07-20 13:55:42'),
+(3, 2, 'Carlos Rodríguez', 'carlos.rodriguez@email.com', '+507 6345-6789', '2025-07-20 13:55:42', 209.98, 15.12, 0.00, 225.10, 'transferencia', 'pendiente', 'Pago pendiente por transferencia', 'INV-2025-003', '2025-07-20 13:55:42', '2025-07-20 13:55:42');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura Stand-in para la vista `sales_summary`
+-- (Véase abajo para la vista actual)
+--
+CREATE TABLE `sales_summary` (
+`id` int(11)
+,`invoice_number` varchar(50)
+,`customer_name` varchar(100)
+,`sale_date` datetime
+,`total_amount` decimal(10,2)
+,`tax_amount` decimal(10,2)
+,`discount_amount` decimal(10,2)
+,`final_amount` decimal(10,2)
+,`payment_method` enum('efectivo','tarjeta_credito','tarjeta_debito','transferencia','cheque')
+,`payment_status` enum('pendiente','pagado','cancelado','reembolsado')
+,`seller_name` varchar(50)
+,`total_items` bigint(21)
+);
 
 -- --------------------------------------------------------
 
@@ -262,101 +344,29 @@ CREATE TABLE `sale_details` (
 -- Volcado de datos para la tabla `sale_details`
 --
 
-INSERT INTO `sale_details` (`id`, `sale_id`, `product_id`, `product_name`, `product_price`, `quantity`, `subtotal`) VALUES
-(1, 1, 1, 'MacBook Air M2', 1199.99, 1, 1199.99),
-(2, 1, 36, 'Logitech MX Master 3S', 99.99, 1, 99.99),
-(3, 1, 28, 'SanDisk Ultra 128GB USB', 24.99, 1, 24.99),
-(4, 2, 7, 'Samsung Galaxy S24', 899.99, 1, 899.99),
-(5, 3, 12, 'JBL Flip 6', 129.99, 1, 129.99),
-(6, 3, 39, 'Logitech C920 HD Webcam', 79.99, 1, 79.99);
-
---
--- Índices para las tablas de ventas
---
-
---
--- Indices de la tabla `sales`
---
-ALTER TABLE `sales`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `invoice_number` (`invoice_number`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `sale_date` (`sale_date`),
-  ADD KEY `payment_status` (`payment_status`);
-
---
--- Indices de la tabla `sale_details`
---
-ALTER TABLE `sale_details`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `sale_id` (`sale_id`),
-  ADD KEY `product_id` (`product_id`);
-
---
--- AUTO_INCREMENT para las tablas de ventas
---
-
---
--- AUTO_INCREMENT de la tabla `sales`
---
-ALTER TABLE `sales`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT de la tabla `sale_details`
---
-ALTER TABLE `sale_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- Restricciones para las tablas de ventas
---
-
---
--- Filtros para la tabla `sales`
---
-ALTER TABLE `sales`
-  ADD CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `sale_details`
---
-ALTER TABLE `sale_details`
-  ADD CONSTRAINT `sale_details_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `sale_details_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+INSERT INTO `sale_details` (`id`, `sale_id`, `product_id`, `product_name`, `product_price`, `quantity`, `subtotal`, `discount_per_item`, `created_at`) VALUES
+(1, 1, 1, 'MacBook Air M2', 1199.99, 1, 1199.99, 0.00, '2025-07-20 13:55:42'),
+(2, 1, 36, 'Logitech MX Master 3S', 99.99, 1, 99.99, 0.00, '2025-07-20 13:55:42'),
+(3, 1, 28, 'SanDisk Ultra 128GB USB', 24.99, 1, 24.99, 0.00, '2025-07-20 13:55:42'),
+(4, 2, 7, 'Samsung Galaxy S24', 899.99, 1, 899.99, 0.00, '2025-07-20 13:55:42'),
+(5, 3, 12, 'JBL Flip 6', 129.99, 1, 129.99, 0.00, '2025-07-20 13:55:42'),
+(6, 3, 39, 'Logitech C920 HD Webcam', 79.99, 1, 79.99, 0.00, '2025-07-20 13:55:42');
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `invoices`
+-- Estructura Stand-in para la vista `seller_stats`
+-- (Véase abajo para la vista actual)
 --
-
-CREATE TABLE `invoices` (
-  `id` int(11) NOT NULL,
-  `sale_id` int(11) NOT NULL,
-  `invoice_number` varchar(50) NOT NULL,
-  `invoice_date` datetime NOT NULL DEFAULT current_timestamp(),
-  `due_date` datetime DEFAULT NULL,
-  `subtotal` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `tax_rate` decimal(5,2) DEFAULT 7.00,
-  `tax_amount` decimal(10,2) DEFAULT 0.00,
-  `discount_amount` decimal(10,2) DEFAULT 0.00,
-  `total_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `invoice_status` enum('borrador','enviada','pagada','vencida','cancelada') DEFAULT 'borrador',
-  `payment_terms` varchar(100) DEFAULT 'Pago inmediato',
-  `notes` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `invoices`
---
-
-INSERT INTO `invoices` (`id`, `sale_id`, `invoice_number`, `subtotal`, `tax_amount`, `discount_amount`, `total_amount`, `invoice_status`, `payment_terms`, `notes`) VALUES
-(1, 1, 'INV-2025-001', 1324.97, 95.40, 0.00, 1420.37, 'pagada', 'Pago inmediato', 'Factura pagada con tarjeta de crédito'),
-(2, 2, 'INV-2025-002', 899.99, 64.80, 50.00, 914.79, 'pagada', 'Pago inmediato', 'Descuento aplicado - Cliente frecuente'),
-(3, 3, 'INV-2025-003', 209.98, 15.12, 0.00, 225.10, 'enviada', 'Pago a 15 días', 'Pendiente de pago por transferencia');
+CREATE TABLE `seller_stats` (
+`id` int(11)
+,`username` varchar(50)
+,`email` varchar(100)
+,`total_sales` bigint(21)
+,`total_revenue` decimal(32,2)
+,`avg_sale_amount` decimal(14,6)
+,`last_sale_date` datetime
+);
 
 -- --------------------------------------------------------
 
@@ -377,58 +387,104 @@ CREATE TABLE `shopping_cart` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `invoice_sequence`
+-- Estructura Stand-in para la vista `top_selling_products`
+-- (Véase abajo para la vista actual)
 --
-
-CREATE TABLE `invoice_sequence` (
-  `id` int(11) NOT NULL,
-  `year` int(4) NOT NULL,
-  `last_number` int(11) NOT NULL DEFAULT 0,
-  `prefix` varchar(10) DEFAULT 'INV',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `invoice_sequence`
---
-
-INSERT INTO `invoice_sequence` (`id`, `year`, `last_number`, `prefix`) VALUES
-(1, 2025, 3, 'INV');
+CREATE TABLE `top_selling_products` (
+`id` int(11)
+,`name` varchar(100)
+,`price` decimal(10,2)
+,`category_name` varchar(100)
+,`total_sold` decimal(32,0)
+,`total_revenue` decimal(32,2)
+,`times_sold` bigint(21)
+);
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `customers`
+-- Estructura de tabla para la tabla `users`
 --
 
-CREATE TABLE `customers` (
+CREATE TABLE `users` (
   `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `phone` varchar(20) DEFAULT NULL,
-  `address` text DEFAULT NULL,
-  `city` varchar(50) DEFAULT NULL,
-  `country` varchar(50) DEFAULT 'Panamá',
-  `tax_id` varchar(50) DEFAULT NULL,
-  `customer_type` enum('individual','empresa') DEFAULT 'individual',
-  `notes` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `username` varchar(50) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('admin','consultor','cliente') DEFAULT 'consultor',
+  `customer_id` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `customers`
+-- Volcado de datos para la tabla `users`
 --
 
-INSERT INTO `customers` (`id`, `name`, `email`, `phone`, `address`, `city`, `customer_type`, `notes`) VALUES
-(1, 'Juan Pérez', 'juan.perez@email.com', '+507 6123-4567', 'Calle 50, Edificio Plaza 2000, Piso 15', 'Ciudad de Panamá', 'individual', 'Cliente frecuente - Descuentos aplicables'),
-(2, 'María González', 'maria.gonzalez@email.com', '+507 6234-5678', 'Vía España, Centro Comercial El Dorado', 'Ciudad de Panamá', 'individual', 'Prefiere pago en efectivo'),
-(3, 'Carlos Rodríguez', 'carlos.rodriguez@email.com', '+507 6345-6789', 'Av. Balboa, Torre de las Américas', 'Ciudad de Panamá', 'individual', 'Ejecutivo de empresa tecnológica');
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `customer_id`, `created_at`) VALUES
+(1, 'admin_tech', 'admin@codecorp.com', 'admin123', 'admin', NULL, '2025-05-30 19:37:03'),
+(2, 'consultor_V', 'consultor@codecorp.com', 'con123', 'consultor', NULL, '2025-05-30 19:37:03'),
+(3, 'juan_perez', 'juan.perez@email.com', 'cliente123', 'cliente', 1, '2025-07-20 16:06:06'),
+(4, 'maria_gonzalez', 'maria.gonzalez@email.com', 'maria2024', 'cliente', 2, '2025-07-20 16:06:06'),
+(5, 'carlos_rodriguez', 'carlos.rodriguez@email.com', 'carlos456', 'cliente', 3, '2025-07-20 16:06:06'),
+(6, 'tecno_y', 'tecnoY@gmail.com', 'tecno2024', 'cliente', 4, '2025-07-20 16:06:06'),
+(7, 'epsilon_admin', 'adrianalbertojimenez@gmail.com', 'epsilon123', 'cliente', 5, '2025-07-20 16:06:06');
+
+-- --------------------------------------------------------
 
 --
--- Índices para las nuevas tablas
+-- Estructura para la vista `pending_invoices`
 --
+DROP TABLE IF EXISTS `pending_invoices`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `pending_invoices`  AS SELECT `i`.`id` AS `id`, `i`.`invoice_number` AS `invoice_number`, `i`.`invoice_date` AS `invoice_date`, `i`.`due_date` AS `due_date`, `i`.`total_amount` AS `total_amount`, `i`.`invoice_status` AS `invoice_status`, `s`.`customer_name` AS `customer_name`, `s`.`customer_email` AS `customer_email`, `s`.`customer_phone` AS `customer_phone`, to_days(curdate()) - to_days(`i`.`due_date`) AS `days_overdue` FROM (`invoices` `i` join `sales` `s` on(`i`.`sale_id` = `s`.`id`)) WHERE `i`.`invoice_status` in ('enviada','vencida') ORDER BY `i`.`due_date` ASC ;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura para la vista `sales_summary`
+--
+DROP TABLE IF EXISTS `sales_summary`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `sales_summary`  AS SELECT `s`.`id` AS `id`, `s`.`invoice_number` AS `invoice_number`, `s`.`customer_name` AS `customer_name`, `s`.`sale_date` AS `sale_date`, `s`.`total_amount` AS `total_amount`, `s`.`tax_amount` AS `tax_amount`, `s`.`discount_amount` AS `discount_amount`, `s`.`final_amount` AS `final_amount`, `s`.`payment_method` AS `payment_method`, `s`.`payment_status` AS `payment_status`, `u`.`username` AS `seller_name`, count(`sd`.`id`) AS `total_items` FROM ((`sales` `s` left join `users` `u` on(`s`.`user_id` = `u`.`id`)) left join `sale_details` `sd` on(`s`.`id` = `sd`.`sale_id`)) GROUP BY `s`.`id` ;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura para la vista `seller_stats`
+--
+DROP TABLE IF EXISTS `seller_stats`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `seller_stats`  AS SELECT `u`.`id` AS `id`, `u`.`username` AS `username`, `u`.`email` AS `email`, count(`s`.`id`) AS `total_sales`, sum(`s`.`final_amount`) AS `total_revenue`, avg(`s`.`final_amount`) AS `avg_sale_amount`, max(`s`.`sale_date`) AS `last_sale_date` FROM (`users` `u` left join `sales` `s` on(`u`.`id` = `s`.`user_id`)) WHERE `u`.`role` = 'admin' GROUP BY `u`.`id` ;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura para la vista `top_selling_products`
+--
+DROP TABLE IF EXISTS `top_selling_products`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `top_selling_products`  AS SELECT `p`.`id` AS `id`, `p`.`name` AS `name`, `p`.`price` AS `price`, `c`.`name` AS `category_name`, sum(`sd`.`quantity`) AS `total_sold`, sum(`sd`.`subtotal`) AS `total_revenue`, count(distinct `sd`.`sale_id`) AS `times_sold` FROM ((`products` `p` left join `sale_details` `sd` on(`p`.`id` = `sd`.`product_id`)) left join `categories` `c` on(`p`.`category_id` = `c`.`id`)) GROUP BY `p`.`id` ORDER BY sum(`sd`.`quantity`) DESC ;
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `categories`
+--
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `customers`
+--
+ALTER TABLE `customers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `name` (`name`),
+  ADD KEY `customer_type` (`customer_type`),
+  ADD KEY `idx_customer_email` (`email`),
+  ADD KEY `idx_customer_login` (`email`,`password`);
 
 --
 -- Indices de la tabla `invoices`
@@ -441,15 +497,6 @@ ALTER TABLE `invoices`
   ADD KEY `invoice_status` (`invoice_status`);
 
 --
--- Indices de la tabla `shopping_cart`
---
-ALTER TABLE `shopping_cart`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `user_product_unique` (`user_id`, `product_id`),
-  ADD KEY `product_id` (`product_id`),
-  ADD KEY `added_at` (`added_at`);
-
---
 -- Indices de la tabla `invoice_sequence`
 --
 ALTER TABLE `invoice_sequence`
@@ -457,17 +504,63 @@ ALTER TABLE `invoice_sequence`
   ADD UNIQUE KEY `year_unique` (`year`);
 
 --
--- Indices de la tabla `customers`
+-- Indices de la tabla `products`
 --
-ALTER TABLE `customers`
+ALTER TABLE `products`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`),
-  ADD KEY `name` (`name`),
-  ADD KEY `customer_type` (`customer_type`);
+  ADD KEY `category_id` (`category_id`);
 
 --
--- AUTO_INCREMENT para las nuevas tablas
+-- Indices de la tabla `sales`
 --
+ALTER TABLE `sales`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `invoice_number` (`invoice_number`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `sale_date` (`sale_date`),
+  ADD KEY `payment_status` (`payment_status`);
+
+--
+-- Indices de la tabla `sale_details`
+--
+ALTER TABLE `sale_details`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sale_id` (`sale_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
+-- Indices de la tabla `shopping_cart`
+--
+ALTER TABLE `shopping_cart`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_product_unique` (`user_id`,`product_id`),
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `added_at` (`added_at`);
+
+--
+-- Indices de la tabla `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `idx_users_customer_id` (`customer_id`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT de la tabla `customers`
+--
+ALTER TABLE `customers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `invoices`
@@ -476,32 +569,69 @@ ALTER TABLE `invoices`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT de la tabla `shopping_cart`
---
-ALTER TABLE `shopping_cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT de la tabla `invoice_sequence`
 --
 ALTER TABLE `invoice_sequence`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT de la tabla `customers`
+-- AUTO_INCREMENT de la tabla `products`
 --
-ALTER TABLE `customers`
+ALTER TABLE `products`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+
+--
+-- AUTO_INCREMENT de la tabla `sales`
+--
+ALTER TABLE `sales`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- Restricciones para las nuevas tablas
+-- AUTO_INCREMENT de la tabla `sale_details`
+--
+ALTER TABLE `sale_details`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `shopping_cart`
+--
+ALTER TABLE `shopping_cart`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
+-- Restricciones para tablas volcadas
 --
 
 --
 -- Filtros para la tabla `invoices`
 --
 ALTER TABLE `invoices`
-  ADD CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+  ADD CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `products`
+--
+ALTER TABLE `products`
+  ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`);
+
+--
+-- Filtros para la tabla `sales`
+--
+ALTER TABLE `sales`
+  ADD CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `sale_details`
+--
+ALTER TABLE `sale_details`
+  ADD CONSTRAINT `sale_details_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `sale_details_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `shopping_cart`
@@ -510,116 +640,11 @@ ALTER TABLE `shopping_cart`
   ADD CONSTRAINT `shopping_cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `shopping_cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
--- --------------------------------------------------------
-
 --
--- Vistas útiles para el sistema de ventas
+-- Filtros para la tabla `users`
 --
-
--- Vista para resumen de ventas
-CREATE VIEW `sales_summary` AS
-SELECT 
-    s.id,
-    s.invoice_number,
-    s.customer_name,
-    s.sale_date,
-    s.total_amount,
-    s.tax_amount,
-    s.discount_amount,
-    s.final_amount,
-    s.payment_method,
-    s.payment_status,
-    u.username as seller_name,
-    COUNT(sd.id) as total_items
-FROM sales s
-LEFT JOIN users u ON s.user_id = u.id
-LEFT JOIN sale_details sd ON s.id = sd.sale_id
-GROUP BY s.id;
-
--- Vista para productos más vendidos
-CREATE VIEW `top_selling_products` AS
-SELECT 
-    p.id,
-    p.name,
-    p.price,
-    c.name as category_name,
-    SUM(sd.quantity) as total_sold,
-    SUM(sd.subtotal) as total_revenue,
-    COUNT(DISTINCT sd.sale_id) as times_sold
-FROM products p
-LEFT JOIN sale_details sd ON p.id = sd.product_id
-LEFT JOIN categories c ON p.category_id = c.id
-GROUP BY p.id
-ORDER BY total_sold DESC;
-
--- Vista para estadísticas de vendedores
-CREATE VIEW `seller_stats` AS
-SELECT 
-    u.id,
-    u.username,
-    u.email,
-    COUNT(s.id) as total_sales,
-    SUM(s.final_amount) as total_revenue,
-    AVG(s.final_amount) as avg_sale_amount,
-    MAX(s.sale_date) as last_sale_date
-FROM users u
-LEFT JOIN sales s ON u.id = s.user_id
-WHERE u.role = 'admin'
-GROUP BY u.id;
-
--- Vista para facturas pendientes
-CREATE VIEW `pending_invoices` AS
-SELECT 
-    i.id,
-    i.invoice_number,
-    i.invoice_date,
-    i.due_date,
-    i.total_amount,
-    i.invoice_status,
-    s.customer_name,
-    s.customer_email,
-    s.customer_phone,
-    DATEDIFF(CURDATE(), i.due_date) as days_overdue
-FROM invoices i
-JOIN sales s ON i.sale_id = s.id
-WHERE i.invoice_status IN ('enviada', 'vencida')
-ORDER BY i.due_date ASC;
-
--- Función para generar siguiente número de factura
-DELIMITER //
-CREATE FUNCTION `get_next_invoice_number`() 
-RETURNS VARCHAR(50)
-READS SQL DATA
-DETERMINISTIC
-BEGIN
-    DECLARE next_number INT;
-    DECLARE current_year INT;
-    DECLARE invoice_num VARCHAR(50);
-    
-    SET current_year = YEAR(CURDATE());
-    
-    -- Obtener o crear secuencia para el año actual
-    INSERT INTO invoice_sequence (year, last_number) 
-    VALUES (current_year, 0)
-    ON DUPLICATE KEY UPDATE last_number = last_number;
-    
-    -- Incrementar el número
-    UPDATE invoice_sequence 
-    SET last_number = last_number + 1 
-    WHERE year = current_year;
-    
-    -- Obtener el nuevo número
-    SELECT last_number INTO next_number 
-    FROM invoice_sequence 
-    WHERE year = current_year;
-    
-    -- Formatear el número de factura
-    SET invoice_num = CONCAT('INV-', current_year, '-', LPAD(next_number, 3, '0'));
-    
-    RETURN invoice_num;
-END//
-DELIMITER ;
-
+ALTER TABLE `users`
+  ADD CONSTRAINT `fk_users_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

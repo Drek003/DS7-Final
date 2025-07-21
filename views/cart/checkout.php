@@ -860,10 +860,16 @@ function formatPrice($amount) {
                                         </div>
 
                                         <!-- Términos y condiciones -->
-                                        <div class="form-check mb-3">
+                                        <div class="form-check mb-2">
                                             <input class="form-check-input" type="checkbox" id="terms" required>
                                             <label class="form-check-label" for="terms">
                                                 Acepto los <a href="#" class="text-decoration-none">términos y condiciones</a> *
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="crear_xml" name="crear_xml">
+                                            <label class="form-check-label" for="crear_xml">
+                                                Crear XML y descargar ZIP con XML e imagen de la factura
                                             </label>
                                         </div>
                                     </div>

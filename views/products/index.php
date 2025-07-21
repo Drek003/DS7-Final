@@ -51,6 +51,14 @@ $stmt = $db->prepare($query);
 $stmt->execute($params);
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Detectar productos con poco stock
+$low_stock_products = [];
+foreach ($products as $product) {
+    if (isset($product['stock'], $product['min_stock']) && $product['stock'] < $product['min_stock']) {
+        $low_stock_products[] = $product['name'];
+    }
+}
+
 // Obtener categorías para el filtro
 $categories_query = "SELECT * FROM categories ORDER BY name ASC";
 $categories_stmt = $db->prepare($categories_query);
@@ -263,4 +271,28 @@ if ($category_filter > 0) {
         <?php endif; ?>
     </script>
 </body>
+<?php if (!empty($low_stock_products)): ?>
+<div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+    <?php foreach ($low_stock_products as $name): ?>
+    <div class="toast align-items-center text-bg-warning border-0 mb-3" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000" style="min-width: 350px; font-size: 1.25rem; padding: 1.25rem 1.5rem;">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-exclamation-triangle"></i>
+                Poco Stock: <strong><?php echo htmlspecialchars($name); ?></strong>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <?php endforeach; ?>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        toastElList.forEach(function(toastEl) {
+            var toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        });
+    });
+</script>
+<?php endif; ?>
 </html>

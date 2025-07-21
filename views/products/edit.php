@@ -44,28 +44,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $price = cleanInput($_POST['price']);
     $image_url = cleanInput($_POST['image_url']);
     $category_id = isset($_POST['category_id']) && !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
-    
+    $stock = isset($_POST['stock']) ? (int)cleanInput($_POST['stock']) : 0;
+    $min_stock = isset($_POST['min_stock']) ? (int)cleanInput($_POST['min_stock']) : 5;
     // Validaciones
     if (empty($name)) {
         $error = 'El nombre del producto es obligatorio';
     } elseif (empty($price) || !is_numeric($price) || $price <= 0) {
         $error = 'El precio debe ser un número mayor a 0';
+    } elseif (!is_numeric($stock) || $stock < 0) {
+        $error = 'La cantidad de stock debe ser un número igual o mayor a 0';
+    } elseif (!is_numeric($min_stock) || $min_stock < 0) {
+        $error = 'La cantidad mínima de stock debe ser un número igual o mayor a 0';
     } else {
         // Validar URL de imagen si se proporciona
         if (!empty($image_url) && !filter_var($image_url, FILTER_VALIDATE_URL)) {
             $error = 'La URL de la imagen no es válida';
         } else {
             // Si no hay errores, actualizar en la base de datos
-            $query = "UPDATE products SET name = ?, description = ?, price = ?, image = ?, category_id = ? WHERE id = ?";
+            $query = "UPDATE products SET name = ?, description = ?, price = ?, stock = ?, min_stock = ?, image = ?, category_id = ? WHERE id = ?";
             $stmt = $db->prepare($query);
-            
-            if ($stmt->execute([$name, $description, $price, $image_url, $category_id, $product_id])) {
+            if ($stmt->execute([$name, $description, $price, $stock, $min_stock, $image_url, $category_id, $product_id])) {
                 $success = 'Producto actualizado correctamente';
-                
                 // Actualizar datos del producto para mostrar los cambios
                 $product['name'] = $name;
                 $product['description'] = $description;
                 $product['price'] = $price;
+                $product['stock'] = $stock;
+                $product['min_stock'] = $min_stock;
                 $product['image'] = $image_url;
                 $product['category_id'] = $category_id;
             } else {
@@ -163,6 +168,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </div>
                             </div>
                             
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="stock" class="form-label">Cantidad en stock *</label>
+                                        <input type="number" class="form-control" id="stock" name="stock" min="0" value="<?php echo htmlspecialchars($product['stock']); ?>" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="min_stock" class="form-label">Cantidad mínima de stock *</label>
+                                        <input type="number" class="form-control" id="min_stock" name="min_stock" min="0" value="<?php echo htmlspecialchars($product['min_stock']); ?>" required>
+                                        <div class="form-text">Por defecto: 5</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="mb-4">
                                 <label for="image_url" class="form-label">URL de la Imagen</label>
                                 
@@ -231,23 +252,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         document.getElementById('productForm').addEventListener('submit', function(e) {
             const nameInput = document.getElementById('name');
             const priceInput = document.getElementById('price');
-            
+            const imageUrlInput = document.getElementById('image_url');
+            const stockInput = document.getElementById('stock');
+            const minStockInput = document.getElementById('min_stock');
             let isValid = true;
-            
             if (!nameInput.value.trim()) {
                 nameInput.classList.add('is-invalid');
                 isValid = false;
             } else {
                 nameInput.classList.remove('is-invalid');
             }
-            
             if (!priceInput.value || parseFloat(priceInput.value) <= 0) {
                 priceInput.classList.add('is-invalid');
                 isValid = false;
             } else {
                 priceInput.classList.remove('is-invalid');
             }
-            
+            if (!stockInput.value || parseInt(stockInput.value) < 0) {
+                stockInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                stockInput.classList.remove('is-invalid');
+            }
+            if (!minStockInput.value || parseInt(minStockInput.value) < 0) {
+                minStockInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                minStockInput.classList.remove('is-invalid');
+            }
             // Validar URL solo si se ha ingresado algo
             if (imageUrlInput.value.trim() && !isValidUrl(imageUrlInput.value.trim())) {
                 imageUrlInput.classList.add('is-invalid');
@@ -255,7 +287,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             } else {
                 imageUrlInput.classList.remove('is-invalid');
             }
-            
             if (!isValid) {
                 e.preventDefault();
                 alert('Por favor complete todos los campos obligatorios correctamente');

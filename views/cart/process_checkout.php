@@ -127,6 +127,10 @@ try {
             $item['quantity'],
             $item['subtotal']
         ]);
+
+        // Restar stock del producto
+        $update_stock_stmt = $db->prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
+        $update_stock_stmt->execute([$item['quantity'], $item['product_id']]);
     }
 
     // Crear la factura

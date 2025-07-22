@@ -1,7 +1,7 @@
 <?php
 // xml_generator.php
 // Genera un XML y una imagen PNG a partir de los datos de la venta y retorna la ruta del ZIP generado
-
+// terminado
 function generateXMLAndImageZip($data, $items) {
     $empresa = 'Mi Empresa S.A. de C.V.';
     $xmlDir = __DIR__;

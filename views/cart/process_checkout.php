@@ -20,6 +20,9 @@ foreach ($required_fields as $field) {
     }
 }
 
+// Recoger si se debe crear el XML
+$crear_xml = isset($_POST['crear_xml']) && $_POST['crear_xml'] === 'on';
+
 $database = new Database();
 $db = $database->getConnection();
 
@@ -154,12 +157,29 @@ try {
         $final_amount
     ]);
 
+
     // Limpiar el carrito
     $clear_cart = $db->prepare("DELETE FROM shopping_cart WHERE user_id = ?");
     $clear_cart->execute([$user_id]);
 
     // Confirmar transacción
     $db->commit();
+
+    // Preparar datos para XML/imagen si corresponde
+    $zip_name = null;
+    if ($crear_xml) {
+        require_once __DIR__ . '/../../xml/xml_generator.php';
+        $xml_data = [
+            'invoice_number' => $invoice_number,
+            'total' => $final_amount,
+            'customer_name' => $_POST['customer_name'],
+            'customer_lastname' => $_POST['customer_lastname'] ?? ($_POST['last_name'] ?? ''),
+            'customer_email' => $_POST['customer_email'],
+            'customer_phone' => $_POST['customer_phone'],
+            'customer_address' => $_POST['customer_address'] ?? ($_POST['address'] ?? ''),
+        ];
+        $zip_name = generateXMLAndImageZip($xml_data, $cart_items);
+    }
 
     // Redirigir a página de confirmación
     $_SESSION['checkout_success'] = [
@@ -172,7 +192,8 @@ try {
         'customer_email' => $_POST['customer_email'],
         'customer_phone' => $_POST['customer_phone'],
         'payment_method' => $_POST['payment_method'],
-        'sale_id' => $sale_id
+        'sale_id' => $sale_id,
+        'zip_name' => $zip_name
     ];
 
     redirect('confirmation.php');

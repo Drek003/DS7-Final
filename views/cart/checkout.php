@@ -78,543 +78,7 @@ function formatPrice($amount) {
     <link href="../../assets/css/styles.css" rel="stylesheet">
     <link href="../../assets/css/custom.css" rel="stylesheet">
     <link href="../../assets/css/bootstrap-dark.css" rel="stylesheet">
-    <style>
-        /* Variables CSS para checkout */
-        :root {
-            --checkout-bg: var(--surface-color);
-            --checkout-item-bg: var(--surface-light);
-            --checkout-border: rgba(255, 255, 255, 0.1);
-            --checkout-text: var(--text-primary);
-            --checkout-text-secondary: var(--text-secondary);
-            --checkout-text-muted: var(--text-muted);
-        }
-
-        /* Contenedor principal del checkout */
-        .checkout-container {
-            background: var(--background-color);
-            min-height: 100vh;
-            padding-top: 20px;
-        }
-
-        /* Encabezado del checkout */
-        .checkout-header {
-            background: var(--checkout-item-bg);
-            border: 1px solid var(--checkout-border);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-        }
-
-        .checkout-header h1 {
-            color: var(--checkout-text);
-            margin-bottom: 0;
-        }
-
-        /* Indicador de pasos */
-        .checkout-steps {
-            background: var(--checkout-item-bg);
-            border: 1px solid var(--checkout-border);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .step {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .step-number {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background: var(--accent-color);
-            color: var(--primary-dark);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-weight: 600;
-        }
-
-        .step.inactive .step-number {
-            background: var(--checkout-border);
-            color: var(--checkout-text-muted);
-        }
-
-        .step-text {
-            color: var(--checkout-text);
-            font-weight: 500;
-        }
-
-        .step.inactive .step-text {
-            color: var(--checkout-text-muted);
-        }
-
-        /* Formulario de checkout */
-        .checkout-form {
-            background: var(--checkout-item-bg);
-            border: 1px solid var(--checkout-border);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            backdrop-filter: blur(10px);
-            box-shadow: var(--box-shadow-light);
-        }
-
-        .form-section {
-            margin-bottom: 30px;
-            padding-bottom: 25px;
-            border-bottom: 1px solid var(--checkout-border);
-        }
-
-        .form-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-
-        .form-section h5 {
-            color: var(--checkout-text);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-        }
-
-        .form-section h5 i {
-            margin-right: 10px;
-            color: var(--accent-color);
-        }
-
-        .form-control {
-            background: var(--background-color);
-            border: 1px solid var(--checkout-border);
-            color: var(--checkout-text);
-            border-radius: 8px;
-            padding: 12px 15px;
-        }
-
-        .form-control:focus {
-            background: var(--background-color);
-            border-color: var(--accent-color);
-            color: var(--checkout-text);
-            box-shadow: 0 0 0 0.2rem rgba(0, 212, 170, 0.25);
-        }
-
-        .form-label {
-            color: var(--checkout-text);
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        /* Resumen del pedido mejorado */
-        .order-summary {
-            background: linear-gradient(135deg, var(--surface-color) 0%, var(--surface-light) 100%);
-            border: 1px solid var(--checkout-border);
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            backdrop-filter: blur(10px);
-            color: var(--checkout-text);
-            position: sticky;
-            top: 20px;
-            height: fit-content;
-        }
-
-        .order-item {
-            padding: 15px 0;
-            border-bottom: 1px solid var(--checkout-border);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .order-item:last-child {
-            border-bottom: none;
-        }
-
-        .order-item-image {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 1px solid var(--checkout-border);
-        }
-
-        .order-item-details {
-            flex: 1;
-        }
-
-        .order-item-name {
-            color: var(--checkout-text);
-            font-weight: 500;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-        }
-
-        .order-item-quantity {
-            color: var(--checkout-text-muted);
-            font-size: 0.8rem;
-        }
-
-        .order-item-price {
-            color: var(--accent-color);
-            font-weight: 600;
-        }
-
-        /* Botones del checkout */
-        .btn-checkout-action {
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-weight: 500;
-            transition: var(--transition);
-            border: 1px solid transparent;
-        }
-
-        .btn-checkout-action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 212, 170, 0.3);
-        }
-
-        .btn-primary.btn-checkout-action {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
-            color: var(--primary-dark);
-        }
-
-        .btn-outline-secondary.btn-checkout-action {
-            border-color: var(--checkout-border);
-            color: var(--checkout-text);
-        }
-
-        .btn-outline-secondary.btn-checkout-action:hover {
-            background: var(--checkout-border);
-            border-color: var(--checkout-border);
-            color: var(--checkout-text);
-        }
-
-        /* Métodos de pago */
-        .payment-method {
-            background: var(--background-color);
-            border: 2px solid var(--checkout-border);
-            border-radius: 8px;
-            padding: 20px;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-bottom: 15px;
-        }
-
-        .payment-method:hover {
-            border-color: var(--accent-color);
-            transform: translateY(-2px);
-        }
-
-        .payment-method.selected {
-            border-color: var(--accent-color);
-            background: rgba(0, 212, 170, 0.1);
-        }
-
-        .payment-method input[type="radio"] {
-            margin-right: 10px;
-        }
-
-        .payment-method-label {
-            color: var(--checkout-text);
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            margin-bottom: 0;
-        }
-
-        .payment-method-icon {
-            margin-right: 10px;
-            color: var(--accent-color);
-            font-size: 1.2rem;
-        }
-
-        /* Etapas del checkout */
-        .checkout-step {
-            display: none;
-        }
-
-        .checkout-step.active {
-            display: block;
-            animation: fadeInSlide 0.5s ease-in-out;
-        }
-
-        @keyframes fadeInSlide {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .step-navigation {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--checkout-border);
-        }
-
-        .step-progress {
-            width: 100%;
-            height: 4px;
-            background: var(--checkout-border);
-            border-radius: 2px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-
-        .step-progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-color) 0%, var(--accent-light) 100%);
-            border-radius: 2px;
-            transition: width 0.5s ease;
-        }
-
-        /* Confirmación de datos */
-        .confirmation-section {
-            background: var(--background-color);
-            border: 1px solid var(--checkout-border);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .confirmation-section h6 {
-            color: var(--accent-color);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .confirmation-section h6 i {
-            margin-right: 8px;
-        }
-
-        .confirmation-data {
-            color: var(--checkout-text);
-        }
-
-        .confirmation-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--checkout-border);
-        }
-
-        .confirmation-item:last-child {
-            border-bottom: none;
-        }
-
-        .confirmation-label {
-            color: var(--checkout-text-muted);
-            font-weight: 500;
-        }
-
-        .confirmation-value {
-            color: var(--checkout-text);
-        }
-
-        .edit-button {
-            color: var(--accent-color);
-            background: none;
-            border: none;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .edit-button:hover {
-            background: rgba(0, 212, 170, 0.1);
-        }
-        @media (max-width: 768px) {
-            .checkout-form {
-                padding: 20px;
-            }
-            
-            .order-summary {
-                margin-top: 20px;
-                position: relative !important;
-            }
-            
-            .step {
-                margin-bottom: 10px;
-            }
-            
-            .step-number {
-                width: 30px;
-                height: 30px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .checkout-header {
-                padding: 15px;
-            }
-            
-            .checkout-header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .form-section {
-                margin-bottom: 20px;
-                padding-bottom: 20px;
-            }
-        }
-
-        /* Animaciones de confirmación exitosa */
-        .success-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            animation: fadeInOverlay 0.5s ease-out;
-        }
-
-        .success-message {
-            background: var(--surface-color);
-            border: 1px solid var(--accent-color);
-            border-radius: var(--border-radius-lg);
-            padding: 40px;
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            animation: slideInSuccess 0.6s ease-out 0.2s both;
-        }
-
-        .success-animation {
-            margin-bottom: 20px;
-        }
-
-        .success-animation i {
-            font-size: 4rem;
-            color: #28a745;
-            animation: successPulse 1.5s ease-in-out infinite;
-        }
-
-        .success-message h2 {
-            color: var(--text-primary);
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .success-message p {
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-        }
-
-        .success-details {
-            background: var(--background-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        .success-details p {
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-
-        .success-details p:last-child {
-            margin-bottom: 0;
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--accent-color);
-        }
-
-        .success-actions {
-            margin-top: 30px;
-        }
-
-        .success-actions .btn {
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .success-actions .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 212, 170, 0.3);
-        }
-
-        @keyframes fadeInOverlay {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideInSuccess {
-            from {
-                opacity: 0;
-                transform: translateY(-50px) scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        @keyframes successPulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-        }
-
-        @keyframes confettiFall {
-            to {
-                transform: translateY(100vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        /* Responsive para mensaje de éxito */
-        @media (max-width: 768px) {
-            .success-message {
-                padding: 30px 20px;
-            }
-            
-            .success-animation i {
-                font-size: 3rem;
-            }
-            
-            .success-message h2 {
-                font-size: 1.5rem;
-            }
-            
-            .success-actions {
-                display: flex;
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .success-actions .btn {
-                width: 100%;
-            }
-        }
-    </style>
+    <link href="../../assets/css/checkout.css" rel="stylesheet">
 </head>
 <body class="checkout-container">
     <?php include '../../includes/nav.php'; ?>
@@ -727,7 +191,7 @@ function formatPrice($amount) {
                                             </div>
                                             <div class="col-md-3">
                                                 <label for="zipCode" class="form-label">Código Postal *</label>
-                                                <input type="text" class="form-control" id="zipCode" name="zip_code" required>
+                                                <input type="text" class="form-control" id="zipCode" name="zip_code" required maxlength="6" pattern="[0-9]{1,6}" placeholder="000000">
                                             </div>
                                         </div>
                                     </div>
@@ -1069,6 +533,14 @@ function formatPrice($amount) {
                         showError('El teléfono debe tener exactamente 8 dígitos (ejemplo: 65982118)');
                         return false;
                     }
+                    // Validación específica de código postal (solo números, máximo 6 dígitos)
+                    const zipCode = document.getElementById('zipCode');
+                    const zipRegex = /^\d{1,6}$/;
+                    if (!zipRegex.test(zipCode.value)) {
+                        zipCode.focus();
+                        showError('El código postal debe contener solo números y máximo 6 dígitos');
+                        return false;
+                    }
                     
                     return true;
 
@@ -1174,7 +646,12 @@ function formatPrice($amount) {
 
             // Seleccionar el método actual
             event.currentTarget.classList.add('selected');
-            document.getElementById(method === 'credit_card' ? 'creditCard' : method).checked = true;
+            
+            // Marcar el radio button correspondiente
+            const radioButton = event.currentTarget.querySelector('input[type="radio"]');
+            if (radioButton) {
+                radioButton.checked = true;
+            }
 
             // Mostrar/ocultar campos de tarjeta
             const creditCardFields = document.getElementById('creditCardFields');
@@ -1186,7 +663,7 @@ function formatPrice($amount) {
                 });
             } else {
                 creditCardFields.style.display = 'none';
-                // Quitar obligatoriedad
+                // Quitar obligatoriedad y limpiar valores
                 creditCardFields.querySelectorAll('input').forEach(input => {
                     input.required = false;
                     input.value = '';
@@ -1213,6 +690,14 @@ function formatPrice($amount) {
         // Validar solo números en CVV
         document.getElementById('cardCvv').addEventListener('input', function(e) {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
+        // Validar solo números en código postal
+        document.getElementById('zipCode').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            if (e.target.value.length > 6) {
+                e.target.value = e.target.value.substring(0, 6);
+            }
         });
 
         // Prevenir envío del formulario si no está en el último paso

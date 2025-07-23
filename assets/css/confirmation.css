@@ -1,0 +1,289 @@
+/* ===== CONFIRMATION STYLES ===== */
+
+/* Variables CSS para confirmación */
+:root {
+    --confirmation-bg: var(--surface-color);
+    --confirmation-item-bg: var(--surface-light);
+    --confirmation-border: rgba(255, 255, 255, 0.1);
+    --confirmation-text: var(--text-primary);
+    --confirmation-text-secondary: var(--text-secondary);
+    --confirmation-text-muted: var(--text-muted);
+}
+
+/* Contenedor principal */
+.confirmation-container {
+    background: var(--background-color);
+    min-height: 100vh;
+    padding-top: 20px;
+}
+
+/* Encabezado de éxito */
+.success-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+    border-radius: var(--border-radius);
+    padding: 40px 30px;
+    margin-bottom: 30px;
+    text-align: center;
+    color: white;
+    box-shadow: var(--box-shadow);
+}
+
+.success-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    animation: successPulse 2s ease-in-out;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.success-header h1 {
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.success-header .order-number {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    border-radius: 25px;
+    display: inline-block;
+    margin-top: 15px;
+    font-weight: 500;
+}
+
+/* Tarjetas de información */
+.info-card {
+    background: var(--confirmation-item-bg);
+    border: 1px solid var(--confirmation-border);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: var(--box-shadow-light);
+    transition: var(--transition);
+}
+
+.info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--box-shadow);
+}
+
+.info-card h5 {
+    color: var(--confirmation-text);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--confirmation-border);
+    padding-bottom: 15px;
+}
+
+.info-card h5 i {
+    margin-right: 10px;
+    color: var(--accent-color);
+    font-size: 1.2rem;
+}
+
+/* Detalles del pedido */
+.order-details {
+    color: var(--confirmation-text);
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--confirmation-border);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+    font-weight: 600;
+    color: var(--accent-color);
+    font-size: 1.1rem;
+}
+
+.detail-label {
+    color: var(--confirmation-text-muted);
+}
+
+.detail-value {
+    color: var(--confirmation-text);
+    font-weight: 500;
+}
+
+/* Información de contacto */
+.contact-info {
+    color: var(--confirmation-text);
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: var(--background-color);
+    border-radius: 8px;
+    border: 1px solid var(--confirmation-border);
+}
+
+.contact-item i {
+    margin-right: 12px;
+    color: var(--accent-color);
+    width: 20px;
+    text-align: center;
+}
+
+/* Pasos siguientes */
+.next-steps {
+    background: var(--confirmation-item-bg);
+    border: 1px solid var(--confirmation-border);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: var(--background-color);
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color);
+}
+
+.step-item:last-child {
+    margin-bottom: 0;
+}
+
+.step-number {
+    background: var(--accent-color);
+    color: var(--primary-dark);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.step-content {
+    color: var(--confirmation-text);
+}
+
+.step-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.step-description {
+    color: var(--confirmation-text-muted);
+    font-size: 0.9rem;
+}
+
+/* Botones de acción */
+.btn-action {
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 500;
+    transition: var(--transition);
+    border: 1px solid transparent;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 212, 170, 0.3);
+}
+
+.btn-primary.btn-action {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--primary-dark);
+}
+
+.btn-success.btn-action {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-outline-primary.btn-action {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.btn-outline-primary.btn-action:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--primary-dark);
+}
+
+.btn-success.btn-action:hover {
+    background: #218838;
+    border-color: #1e7e34;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .success-header {
+        padding: 30px 20px;
+    }
+    
+    .success-icon {
+        font-size: 3rem;
+    }
+    
+    .info-card {
+        padding: 20px;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .step-item {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 576px) {
+    .success-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .success-header .order-number {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Animaciones */
+.info-card {
+    animation: slideIn 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.info-card:nth-child(1) { animation-delay: 0.1s; }
+.info-card:nth-child(2) { animation-delay: 0.2s; }
+.info-card:nth-child(3) { animation-delay: 0.3s; }
+.info-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

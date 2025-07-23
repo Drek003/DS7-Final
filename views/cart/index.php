@@ -133,6 +133,7 @@ function formatPrice($amount) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="../../assets/css/styles.css" rel="stylesheet">
     <link href="../../assets/css/custom.css" rel="stylesheet">
+    <link href="../../assets/css/catg.css" rel="stylesheet">
     <link href="../../assets/css/bootstrap-dark.css" rel="stylesheet">
     <style>
         /* Variables CSS personalizadas para el carrito */

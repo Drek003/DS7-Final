@@ -166,6 +166,38 @@ if ($export === 'xml') {
     <link href="../../assets/css/custom.css" rel="stylesheet">
     <link href="../../assets/css/catg.css" rel="stylesheet">
     <link href="../../assets/css/bootstrap-dark.css" rel="stylesheet">
+    <style>
+        /* Asegurar que el fondo sea consistente */
+        body {
+            background-color: var(--bs-body-bg, #f8f9fa) !important;
+        }
+        
+        .main-content {
+            background-color: transparent !important;
+            min-height: 100vh;
+        }
+        
+        .container-fluid {
+            background-color: transparent !important;
+        }
+        
+        /* Si estás usando tema oscuro, ajusta aquí */
+        [data-bs-theme="dark"] body,
+        .dark-theme body {
+            background-color: #212529 !important;
+        }
+        
+        [data-bs-theme="dark"] .main-content,
+        .dark-theme .main-content {
+            background-color: transparent !important;
+        }
+        
+        /* Asegurar que las cards mantengan su estilo pero el fondo general sea consistente */
+        .card {
+            background-color: var(--bs-card-bg);
+            border: var(--bs-card-border-width) solid var(--bs-card-border-color);
+        }
+    </style>
 </head>
 <body>
 <?php include '../../includes/nav.php'; ?>

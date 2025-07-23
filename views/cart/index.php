@@ -178,7 +178,7 @@ function formatPrice($amount) {
 
                 <div class="row">
                     <!-- Lista de productos del carrito -->
-                    <div class="col-lg-8 col-12">
+                    <div class="col-lg-7 col-12 order-1 order-lg-1">
                         <?php if (empty($cart_items)): ?>
                         <div class="empty-cart">
                             <i class="fas fa-shopping-cart mb-4"></i>
@@ -205,9 +205,11 @@ function formatPrice($amount) {
                             </form>
                         </div>
 
-                        <!-- Productos individuales -->
-                        <?php foreach ($cart_items as $item): ?>
-                        <div class="cart-item p-3 p-md-4">
+                        <!-- Contenedor con scroll para productos -->
+                        <div class="cart-products-container" id="cartProductsContainer" style="max-height: 60vh; overflow-y: auto;">
+                            <!-- Productos individuales -->
+                            <?php foreach ($cart_items as $item): ?>
+                            <div class="cart-item p-4" style="min-height: 140px;">
                             <div class="row align-items-center g-3">
                                 <!-- Imagen del producto -->
                                 <div class="col-auto">
@@ -311,13 +313,14 @@ function formatPrice($amount) {
                             </div>
                         </div>
                         <?php endforeach; ?>
+                        </div> <!-- Cerrar cart-products-container -->
                         <?php endif; ?>
                     </div>
 
                     <!-- Resumen del carrito al lado -->
                     <?php if (!empty($cart_items)): ?>
-                    <div class="col-lg-4 col-12">
-                        <div class="cart-summary p-4">
+                    <div class="col-lg-4 col-12 order-2 order-lg-3 d-flex align-items-start">
+                        <div class="cart-summary p-4 w-100" style="margin-top: 0;">
                             <div class="text-center mb-4">
                                 <h4 class="mb-2">
                                     <i class="fas fa-receipt me-2"></i> 
@@ -415,6 +418,7 @@ function formatPrice($amount) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../../assets/js/app.js"></script>
+    <script src="../../assets/js/cart.js"></script>
     <script>
         // Función simple para cambiar cantidad
         function changeQuantity(cartId, change) {
@@ -765,6 +769,20 @@ function formatPrice($amount) {
                         window.refreshCartCount();
                     }
                 }, 100);
+            }
+        });
+
+        // Prevenir selección de texto con drag
+        document.addEventListener('selectstart', function(e) {
+            if (!e.target.closest('input, textarea, [contenteditable="true"], .selectable-text')) {
+                e.preventDefault();
+            }
+        });
+
+        // Prevenir menú contextual en algunos elementos
+        document.addEventListener('contextmenu', function(e) {
+            if (e.target.closest('.cart-item, .cart-summary')) {
+                e.preventDefault();
             }
         });
     </script>

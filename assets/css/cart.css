@@ -32,6 +32,49 @@
     border-color: rgba(0, 212, 170, 0.3);
 }
 
+/* Alineación mejorada de elementos dentro del cart-item */
+.cart-item .row.align-items-center {
+    min-height: 100px; /* Altura mínima consistente */
+}
+
+.cart-item .col-auto,
+.cart-item .col-12,
+.cart-item .col-6,
+.cart-item .col-sm-3,
+.cart-item .col-sm-6,
+.cart-item .col-lg-2,
+.cart-item .col-lg-4 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 8px;
+}
+
+/* Excepción para la imagen del producto */
+.cart-item .col-auto {
+    justify-content: center;
+    align-items: center;
+}
+
+/* Excepción para la información del producto - alineación izquierda */
+.cart-item .col-12.col-sm-6.col-lg-4 {
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* Centrar controles de precio, cantidad y subtotal */
+.cart-item .col-6.col-sm-3.col-lg-2.text-center,
+.cart-item .col-6.col-sm-3.col-lg-2,
+.cart-item .col-12.col-lg-2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
 /* Imagen del producto */
 .product-image {
     width: 80px;
@@ -53,6 +96,37 @@
     font-size: 1.1rem;
 }
 
+/* Mejorar la presentación de precios en el carrito */
+.cart-item .price-highlight {
+    margin: 4px 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.cart-item .text-center.mb-2 {
+    margin-bottom: 0.5rem !important;
+}
+
+.cart-item .text-center.mb-1 {
+    margin-bottom: 0.25rem !important;
+}
+
+/* Alineación perfecta de labels y valores */
+.cart-item small.text-muted.d-block {
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+/* Mejorar el stock info */
+.cart-item small.text-muted:not(.d-block) {
+    font-size: 0.75rem;
+    margin-top: 4px;
+    line-height: 1.2;
+}
+
 /* Resumen del carrito mejorado */
 .cart-summary {
     background: linear-gradient(135deg, var(--surface-color) 0%, var(--surface-light) 100%);
@@ -62,8 +136,71 @@
     backdrop-filter: blur(10px);
     color: var(--cart-text);
     position: sticky;
-    top: 20px;
+    top: 15px; /* Reducido para mejor visibilidad */
     height: fit-content;
+    max-height: 85vh; /* Límite de altura para pantallas pequeñas */
+    overflow-y: auto; /* Scroll si el contenido es muy largo */
+}
+
+/* Mejorar la alineación de elementos en el resumen */
+.cart-summary .summary-details {
+    width: 100%;
+}
+
+.cart-summary .d-flex.justify-content-between {
+    align-items: center;
+    margin-bottom: 0;
+    padding: 12px 0;
+}
+
+.cart-summary .d-flex.justify-content-between:last-child {
+    padding-top: 20px;
+    padding-bottom: 0;
+    margin-top: 16px;
+}
+
+/* Mejorar espaciado entre elementos del resumen */
+.cart-summary .border-bottom {
+    border-color: var(--cart-border) !important;
+}
+
+/* Alinear iconos y texto en el resumen */
+.cart-summary span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cart-summary .text-muted i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Asegurar que los precios estén perfectamente alineados */
+.cart-summary .fw-semibold,
+.cart-summary .fw-bold {
+    font-variant-numeric: tabular-nums;
+    min-width: 80px;
+    text-align: right;
+}
+
+/* Alineación del resumen con el encabezado de productos */
+.cart-summary-container {
+    margin-top: 0; /* Alinear con el primer elemento de productos */
+}
+
+/* Asegurar que el resumen esté alineado correctamente en desktop */
+@media (min-width: 992px) {
+    .cart-summary-container {
+        margin-top: 0; /* Mismo nivel que el encabezado de productos */
+    }
+}
+
+/* En móviles, mantener el margen estándar */
+@media (max-width: 991px) {
+    .cart-summary-container {
+        margin-top: 2rem; /* Espacio en móviles para separar del carrito */
+    }
 }
 
 /* Botones del carrito */
@@ -125,6 +262,7 @@
     align-items: center;
     gap: 8px;
     justify-content: center;
+    margin: 8px 0;
 }
 
 .quantity-btn {
@@ -162,6 +300,22 @@
     font-weight: 600;
     color: var(--cart-text);
     font-size: 1.1rem;
+}
+
+/* Mejorar el contenedor de cantidad */
+.cart-item .col-6.col-sm-3.col-lg-2:has(.quantity-controls) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.cart-item .text-center.mb-2 {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Encabezado del carrito */
@@ -207,6 +361,7 @@
     padding: 6px 12px;
     border-radius: 6px;
     transition: var(--transition);
+    margin-top: 8px;
 }
 
 .cart-item .btn-outline-danger:hover {
@@ -217,15 +372,44 @@
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
+/* Mejorar la fila del botón eliminar */
+.cart-item .row:last-child {
+    margin-top: 0;
+    padding-top: 15px;
+    border-top: 1px solid var(--cart-border);
+}
+
+.cart-item .d-flex.justify-content-end {
+    width: 100%;
+    justify-content: flex-end !important;
+    align-items: center;
+}
+
 /* Espaciado mejorado para los elementos del carrito */
 .cart-item .row:first-child {
     margin-bottom: 0;
+    align-items: center !important;
 }
 
-.cart-item .row:last-child {
-    margin-top: 0;
-    padding-top: 10px;
-    border-top: 1px solid var(--cart-border);
+/* Mejorar alineación vertical en todas las columnas */
+.cart-item .row.align-items-center > * {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 80px;
+}
+
+/* Excepciones específicas para mantener el layout correcto */
+.cart-item .col-auto {
+    min-height: auto;
+    justify-content: center;
+    align-items: center;
+}
+
+.cart-item .col-12.col-sm-6.col-lg-4 {
+    justify-content: center;
+    align-items: flex-start;
+    text-align: left;
 }
 
 /* Animaciones y transiciones para actualizaciones en tiempo real */
@@ -301,6 +485,22 @@
         padding-top: 15px;
         margin-top: 10px;
     }
+    
+    /* Mejorar alineación en móviles */
+    .cart-item .row.align-items-center > * {
+        min-height: 60px;
+        text-align: center;
+    }
+    
+    .cart-item .col-12.col-sm-6.col-lg-4 {
+        text-align: center;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .cart-item .col-6 {
+        margin-bottom: 8px;
+    }
 }
 
 @media (max-width: 576px) {
@@ -353,4 +553,289 @@
 .btn-cart-action:focus {
     outline: 2px solid var(--accent-color);
     outline-offset: 2px;
+}
+
+/* Impedir selección de texto en toda la página del carrito */
+.cart-container {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Permitir selección solo en inputs y elementos específicos */
+.cart-container input,
+.cart-container textarea,
+.cart-container [contenteditable="true"],
+.cart-container .selectable-text {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+/* Contenedor de productos con scroll */
+.cart-products-container {
+    max-height: 75vh; /* Altura máxima del contenedor aumentada */
+    min-height: 400px; /* Altura mínima para mantener consistencia */
+    overflow-y: auto; /* Scroll vertical */
+    overflow-x: hidden; /* Sin scroll horizontal */
+    padding-right: 15px; /* Espacio para la barra de scroll */
+    margin-bottom: 20px;
+    position: relative;
+    border: 1px solid var(--cart-border);
+    border-radius: var(--border-radius);
+    background: var(--cart-item-bg);
+    padding: 10px;
+}
+
+/* Personalizar scrollbar para mejor apariencia */
+.cart-products-container::-webkit-scrollbar {
+    width: 12px; /* Barra más ancha y visible */
+    background: var(--surface-color);
+    border-radius: 6px;
+}
+
+.cart-products-container::-webkit-scrollbar-track {
+    background: var(--surface-color);
+    border-radius: 6px;
+    margin: 5px 0;
+    border: 1px solid var(--cart-border);
+}
+
+.cart-products-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--accent-color), var(--primary-color));
+    border-radius: 6px;
+    transition: var(--transition);
+    min-height: 30px;
+    border: 2px solid var(--surface-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.cart-products-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--primary-color), #007bff);
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.cart-products-container::-webkit-scrollbar-thumb:active {
+    background: var(--primary-color);
+}
+
+/* Botones de arriba y abajo en la scrollbar */
+.cart-products-container::-webkit-scrollbar-button {
+    display: block;
+    height: 20px;
+    background: var(--accent-color);
+    border-radius: 6px;
+    border: 1px solid var(--cart-border);
+}
+
+.cart-products-container::-webkit-scrollbar-button:hover {
+    background: var(--primary-color);
+}
+
+/* Para Firefox - scrollbar más ancha */
+.cart-products-container {
+    scrollbar-width: auto; /* Más visible que 'thin' */
+    scrollbar-color: var(--accent-color) var(--surface-color);
+}
+
+/* Animación suave al hacer scroll */
+.cart-products-container {
+    scroll-behavior: smooth;
+}
+
+/* Indicador de scroll mejorado */
+.scroll-indicator {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(var(--cart-item-bg), transparent);
+    z-index: 10;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    border-radius: var(--border-radius);
+    animation: pulse 2s infinite;
+}
+
+.scroll-indicator small {
+    background: var(--surface-color);
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid var(--cart-border);
+    display: inline-block;
+    backdrop-filter: blur(10px);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Ocultar indicador cuando se hace scroll */
+.cart-products-container.scrolled .scroll-indicator {
+    display: none !important;
+}
+
+/* Botón de scroll hacia abajo */
+.scroll-down-btn {
+    position: sticky;
+    bottom: 10px;
+    right: 10px;
+    z-index: 20;
+    text-align: right;
+    pointer-events: none;
+}
+
+.scroll-down-btn button {
+    pointer-events: all;
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: white !important;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: bounce 2s infinite;
+}
+
+.scroll-down-btn button:hover {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    transform: scale(1.1);
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Barra de navegación flotante para productos */
+.product-navigation-bar {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    background: rgba(33, 37, 41, 0.95);
+    border: 1px solid var(--cart-border);
+    border-radius: 25px;
+    padding: 15px 8px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    display: none; /* Oculto por defecto */
+    flex-direction: column;
+    align-items: center;
+    max-height: 300px;
+    min-width: 45px;
+}
+
+.product-navigation-bar.visible {
+    display: flex;
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+/* Botones de navegación */
+.nav-btn {
+    background: var(--accent-color);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 3px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.nav-btn:hover {
+    background: var(--primary-color);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.nav-btn:active {
+    transform: scale(0.95);
+}
+
+.nav-btn.disabled {
+    background: var(--surface-color);
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.nav-btn.disabled:hover {
+    transform: none;
+    background: var(--surface-color);
+}
+
+/* Indicador de posición */
+.position-indicator {
+    background: var(--surface-color);
+    border: 1px solid var(--cart-border);
+    border-radius: 10px;
+    width: 20px;
+    height: 80px;
+    margin: 10px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.position-thumb {
+    background: linear-gradient(180deg, var(--accent-color), var(--primary-color));
+    width: 100%;
+    height: 20px;
+    border-radius: 8px;
+    position: absolute;
+    top: 0;
+    transition: top 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Contador de productos */
+.product-counter {
+    background: var(--surface-color);
+    border: 1px solid var(--cart-border);
+    border-radius: 12px;
+    padding: 4px 8px;
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--text-color);
+    text-align: center;
+    min-width: 35px;
+}
+
+/* Responsive - ocultar en pantallas pequeñas */
+@media (max-width: 992px) {
+    .product-navigation-bar {
+        display: none !important;
+    }
 }

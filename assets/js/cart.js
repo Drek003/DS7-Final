@@ -316,6 +316,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof updateCartCount === 'function') {
         updateCartCount();
     }
+    
+    // Inicializar funcionalidad de scroll para el carrito
+    initCartScroll();
 });
 
 // CSS para la animación de ripple
@@ -329,3 +332,112 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Función para manejar el scroll del contenedor del carrito
+function initCartScroll() {
+    const cartContainer = document.getElementById('cartProductsContainer');
+    const scrollIndicator = document.querySelector('.scroll-indicator');
+    const scrollDownBtn = document.querySelector('.scroll-down-btn button');
+    
+    if (!cartContainer) {
+        console.log('ℹ️ Contenedor del carrito no encontrado - probablemente no estamos en la página del carrito');
+        return;
+    }
+    
+    console.log('🛒 Inicializando funcionalidad de scroll del carrito');
+    
+    // Función para verificar si hay scroll disponible
+    function hasScroll() {
+        return cartContainer.scrollHeight > cartContainer.clientHeight;
+    }
+    
+    // Función para mostrar/ocultar indicadores
+    function updateScrollIndicators() {
+        const isAtTop = cartContainer.scrollTop === 0;
+        const isAtBottom = cartContainer.scrollTop + cartContainer.clientHeight >= cartContainer.scrollHeight - 5;
+        const hasScrollContent = hasScroll();
+        
+        // Mostrar indicador solo si hay scroll y estamos en la parte superior
+        if (scrollIndicator) {
+            if (hasScrollContent && isAtTop) {
+                scrollIndicator.style.display = 'block';
+                cartContainer.classList.remove('scrolled');
+            } else {
+                scrollIndicator.style.display = 'none';
+                cartContainer.classList.add('scrolled');
+            }
+        }
+        
+        // Mostrar botón de scroll hacia abajo solo si hay scroll y no estamos en la parte inferior
+        if (scrollDownBtn) {
+            const btnContainer = scrollDownBtn.parentElement;
+            if (hasScrollContent && !isAtBottom) {
+                btnContainer.style.display = 'block';
+            } else {
+                btnContainer.style.display = 'none';
+            }
+        }
+    }
+    
+    // Evento de scroll
+    cartContainer.addEventListener('scroll', function() {
+        updateScrollIndicators();
+        
+        // Añadir clase para animaciones
+        cartContainer.classList.add('scrolling');
+        
+        // Remover clase después de un tiempo
+        clearTimeout(cartContainer.scrollTimeout);
+        cartContainer.scrollTimeout = setTimeout(() => {
+            cartContainer.classList.remove('scrolling');
+        }, 150);
+    });
+    
+    // Evento del botón de scroll hacia abajo
+    if (scrollDownBtn) {
+        scrollDownBtn.addEventListener('click', function() {
+            const scrollAmount = cartContainer.clientHeight * 0.8; // Scroll 80% de la altura visible
+            cartContainer.scrollBy({
+                top: scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+    }
+    
+    // Inicializar indicadores
+    updateScrollIndicators();
+    
+    // Observer para cambios en el contenido
+    const observer = new MutationObserver(function() {
+        setTimeout(updateScrollIndicators, 100); // Pequeño delay para que se actualice el DOM
+    });
+    
+    observer.observe(cartContainer, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style']
+    });
+    
+    // Actualizar en resize de ventana
+    window.addEventListener('resize', updateScrollIndicators);
+    
+    console.log('✅ Funcionalidad de scroll del carrito inicializada correctamente');
+}
+
+// Función de utilidad para scroll suave hacia un elemento específico
+function scrollToCartItem(itemId) {
+    const cartContainer = document.getElementById('cartProductsContainer');
+    const targetItem = document.querySelector(`[data-product-id="${itemId}"]`);
+    
+    if (cartContainer && targetItem) {
+        const itemTop = targetItem.offsetTop;
+        const containerTop = cartContainer.offsetTop;
+        const scrollPosition = itemTop - containerTop - 20; // 20px de margen
+        
+        cartContainer.scrollTo({
+            top: scrollPosition,
+            behavior: 'smooth'
+        });
+    }
+}

@@ -3,7 +3,7 @@
 // Genera un XML y una imagen PNG a partir de los datos de la venta y retorna la ruta del ZIP generado
 // terminado
 function generateXMLAndImageZip($data, $items) {
-    $empresa = 'Mi Empresa S.A. de C.V.';
+    $empresa = 'CodeCorp S.A.';
     $xmlDir = __DIR__;
     $zipName = 'factura_' . $data['invoice_number'] . '_' . time() . '.zip';
     $xmlFile = 'factura_' . $data['invoice_number'] . '.xml';

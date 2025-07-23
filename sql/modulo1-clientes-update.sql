@@ -5,11 +5,11 @@
 -- 
 -- INSTRUCCIONES:
 -- 1. Respalda tu base de datos actual antes de ejecutar
--- 2. Ejecuta este script en tu base de datos 'ds6-2'
+-- 2. Ejecuta este script en tu base de datos 'ds7'
 -- 3. Este script agrega funcionalidades sin eliminar datos existentes
 --
 
-USE `ds6-2`;
+USE `ds7`;
 
 -- =========================================
 -- 1. AGREGAR CONTRASEÑA A TABLA CUSTOMERS

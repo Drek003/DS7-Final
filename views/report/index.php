@@ -217,6 +217,38 @@ $results = $stmt->fetchAll();
     <link href="../../assets/css/custom.css" rel="stylesheet">
     <link href="../../assets/css/catg.css" rel="stylesheet">
     <link href="../../assets/css/bootstrap-dark.css" rel="stylesheet">
+    <style>
+        /* Asegurar que el fondo sea consistente */
+        body {
+            background-color: var(--bs-body-bg, #f8f9fa) !important;
+        }
+        
+        .main-content {
+            background-color: transparent !important;
+            min-height: 100vh;
+        }
+        
+        .container-fluid {
+            background-color: transparent !important;
+        }
+        
+        /* Si estás usando tema oscuro, ajusta aquí */
+        [data-bs-theme="dark"] body,
+        .dark-theme body {
+            background-color: #212529 !important;
+        }
+        
+        [data-bs-theme="dark"] .main-content,
+        .dark-theme .main-content {
+            background-color: transparent !important;
+        }
+        
+        /* Asegurar que las cards mantengan su estilo pero el fondo general sea consistente */
+        .card {
+            background-color: var(--bs-card-bg);
+            border: var(--bs-card-border-width) solid var(--bs-card-border-color);
+        }
+    </style>
 </head>
 <body>
 <?php include '../../includes/nav.php'; ?>
@@ -323,32 +355,6 @@ $results = $stmt->fetchAll();
 
   </div>
 </main>
-
-<!-- Mostrar mensajes de error si existen -->
-<?php if (isset($_SESSION['error'])): ?>
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-  <div class="toast show" role="alert">
-    <div class="toast-header bg-danger text-white">
-      <strong class="me-auto">Error</strong>
-      <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-    </div>
-    <div class="toast-body">
-      <?= htmlspecialchars($_SESSION['error']) ?>
-    </div>
-  </div>
-</div>
-<?php unset($_SESSION['error']); endif; ?>
-
 <script src="../../assets/js/bootstrap.bundle.min.js"></script>
-<script>
-// Auto-ocultar mensajes después de 5 segundos
-setTimeout(function() {
-    var toasts = document.querySelectorAll('.toast');
-    toasts.forEach(function(toast) {
-        var bsToast = new bootstrap.Toast(toast);
-        bsToast.hide();
-    });
-}, 5000);
-</script>
 </body>
 </html>

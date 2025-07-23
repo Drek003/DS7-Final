@@ -154,7 +154,7 @@ DS7-Final/
 │   ├── xml_generator.php          # Generador de XML y ZIP
 │   └── README                     # Documentación XML
 └── sql/
-    ├── ds6-2.sql                  # Base de datos principal
+    ├── ds7.sql                  # Base de datos principal
     └── modulo1-clientes-update.sql # Actualización de clientes
 ```
 
@@ -303,7 +303,7 @@ CREATE DATABASE ds6_2;
 USE ds6_2;
 
 # Importar el archivo SQL
-SOURCE sql/ds6-2.sql;
+SOURCE sql/ds7.sql;
 ```
 
 4. **Configurar conexión a BD**

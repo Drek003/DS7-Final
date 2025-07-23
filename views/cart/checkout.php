@@ -12,6 +12,34 @@ $db = $database->getConnection();
 
 $user_id = $_SESSION['user_id'];
 
+// Obtener datos del usuario para prellenar el formulario
+$user_query = "
+    SELECT u.email, c.name, c.phone, c.address, c.city, c.country
+    FROM users u 
+    LEFT JOIN customers c ON u.customer_id = c.id 
+    WHERE u.id = ?
+";
+$user_stmt = $db->prepare($user_query);
+$user_stmt->execute([$user_id]);
+$user_data = $user_stmt->fetch(PDO::FETCH_ASSOC);
+
+// Si no hay datos del cliente, inicializar array vacío
+if (!$user_data) {
+    $user_data = [
+        'email' => '',
+        'name' => '',
+        'phone' => '',
+        'address' => '',
+        'city' => '',
+        'country' => ''
+    ];
+}
+
+// Separar nombre y apellido si están juntos
+$full_name_parts = explode(' ', $user_data['name'] ?? '', 2);
+$first_name = $full_name_parts[0] ?? '';
+$last_name = $full_name_parts[1] ?? '';
+
 // Verificar si hay errores de checkout
 $checkout_error = '';
 if (isset($_SESSION['checkout_error'])) {
@@ -163,31 +191,40 @@ function formatPrice($amount) {
                                         <div class="row g-3">
                                             <div class="col-md-6">
                                                 <label for="firstName" class="form-label">Nombre *</label>
-                                                <input type="text" class="form-control" id="firstName" name="first_name" required>
+                                                <input type="text" class="form-control" id="firstName" name="first_name" 
+                                                       value="<?php echo htmlspecialchars($first_name); ?>" required>
                                             </div>
                                             <div class="col-md-6">
                                                 <label for="lastName" class="form-label">Apellido *</label>
-                                                <input type="text" class="form-control" id="lastName" name="last_name" required>
+                                                <input type="text" class="form-control" id="lastName" name="last_name" 
+                                                       value="<?php echo htmlspecialchars($last_name); ?>" required>
                                             </div>
                                             <div class="col-12">
                                                 <label for="email" class="form-label">Correo Electrónico *</label>
-                                                <input type="email" class="form-control" id="email" name="email" required>
+                                                <input type="email" class="form-control" id="email" name="email" 
+                                                       value="<?php echo htmlspecialchars($user_data['email']); ?>" required>
                                             </div>
                                             <div class="col-12">
                                                 <label for="phone" class="form-label">Teléfono *</label>
-                                                <input type="tel" class="form-control" id="phone" name="phone" required maxlength="8" placeholder="65982118">
+                                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                                       value="<?php echo htmlspecialchars($user_data['phone']); ?>" 
+                                                       required maxlength="14" placeholder="+507 6345-6789">
+                                                <div class="form-text">Formato: +507 6345-6789</div>
                                             </div>
                                             <div class="col-12">
                                                 <label for="address" class="form-label">Dirección *</label>
-                                                <input type="text" class="form-control" id="address" name="address" required>
+                                                <input type="text" class="form-control" id="address" name="address" 
+                                                       value="<?php echo htmlspecialchars($user_data['address']); ?>" required>
                                             </div>
                                             <div class="col-md-6">
                                                 <label for="city" class="form-label">Ciudad *</label>
-                                                <input type="text" class="form-control" id="city" name="city" required>
+                                                <input type="text" class="form-control" id="city" name="city" 
+                                                       value="<?php echo htmlspecialchars($user_data['city']); ?>" required>
                                             </div>
                                             <div class="col-md-3">
                                                 <label for="state" class="form-label">Estado/Provincia *</label>
-                                                <input type="text" class="form-control" id="state" name="state" required>
+                                                <input type="text" class="form-control" id="state" name="state" 
+                                                       value="<?php echo htmlspecialchars($user_data['country'] ?: 'Panamá'); ?>" required>
                                             </div>
                                             <div class="col-md-3">
                                                 <label for="zipCode" class="form-label">Código Postal *</label>
@@ -324,16 +361,10 @@ function formatPrice($amount) {
                                         </div>
 
                                         <!-- Términos y condiciones -->
-                                        <div class="form-check mb-2">
+                                        <div class="form-check mb-3">
                                             <input class="form-check-input" type="checkbox" id="terms" required>
                                             <label class="form-check-label" for="terms">
                                                 Acepto los <a href="#" class="text-decoration-none">términos y condiciones</a> *
-                                            </label>
-                                        </div>
-                                        <div class="form-check mb-3">
-                                            <input class="form-check-input" type="checkbox" id="crear_xml" name="crear_xml">
-                                            <label class="form-check-label" for="crear_xml">
-                                                Crear XML y descargar ZIP con XML e imagen de la factura
                                             </label>
                                         </div>
                                     </div>
@@ -531,12 +562,12 @@ function formatPrice($amount) {
                         return false;
                     }
                     
-                    // Validación específica de teléfono (exactamente 8 dígitos)
+                    // Validación específica de teléfono (formato +507 6345-6789)
                     const phone = document.getElementById('phone');
-                    const phoneRegex = /^\d{8}$/;
+                    const phoneRegex = /^\+507 \d{4}-\d{4}$/;
                     if (!phoneRegex.test(phone.value)) {
                         phone.focus();
-                        showError('El teléfono debe tener exactamente 8 dígitos (ejemplo: 65982118)');
+                        showError('El teléfono debe tener el formato +507 6345-6789');
                         return false;
                     }
                     // Validación específica de código postal (solo números, máximo 6 dígitos)
@@ -706,6 +737,44 @@ function formatPrice($amount) {
             }
         });
 
+        // Formatear teléfono automáticamente (+507 6345-6789)
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Quitar todo lo que no sea número
+            
+            // Si no empieza con 507, agregarlo
+            if (value.length > 0 && !value.startsWith('507')) {
+                if (value.startsWith('6') || value.startsWith('2') || value.startsWith('3') || value.startsWith('4') || value.startsWith('5') || value.startsWith('7') || value.startsWith('8') || value.startsWith('9')) {
+                    value = '507' + value;
+                }
+            }
+            
+            // Limitar a 11 dígitos (507 + 8 dígitos)
+            if (value.length > 11) {
+                value = value.substring(0, 11);
+            }
+            
+            // Formatear según la longitud
+            let formattedValue = '';
+            if (value.length > 0) {
+                if (value.length <= 3) {
+                    formattedValue = '+' + value;
+                } else if (value.length <= 7) {
+                    formattedValue = '+' + value.substring(0, 3) + ' ' + value.substring(3);
+                } else {
+                    formattedValue = '+' + value.substring(0, 3) + ' ' + value.substring(3, 7) + '-' + value.substring(7);
+                }
+            }
+            
+            e.target.value = formattedValue;
+        });
+
+        // Al hacer focus en el teléfono, si está vacío, agregar +507
+        document.getElementById('phone').addEventListener('focus', function(e) {
+            if (e.target.value === '') {
+                e.target.value = '+507 ';
+            }
+        });
+
         // Prevenir envío del formulario si no está en el último paso
         document.getElementById('checkoutForm').addEventListener('submit', function(e) {
             if (currentStep !== 3) {
@@ -741,6 +810,18 @@ function formatPrice($amount) {
         // Inicializar
         document.addEventListener('DOMContentLoaded', function() {
             showStep(1);
+            
+            // Formatear teléfono existente si hay datos
+            const phoneField = document.getElementById('phone');
+            if (phoneField.value && !phoneField.value.startsWith('+507')) {
+                // Si el teléfono no tiene el formato correcto, formatearlo
+                let phoneValue = phoneField.value.replace(/\D/g, '');
+                if (phoneValue.length === 8) {
+                    phoneField.value = '+507 ' + phoneValue.substring(0, 4) + '-' + phoneValue.substring(4);
+                } else if (phoneValue.length === 11 && phoneValue.startsWith('507')) {
+                    phoneField.value = '+507 ' + phoneValue.substring(3, 7) + '-' + phoneValue.substring(7);
+                }
+            }
             
             // Animaciones al cargar la página
             const formSections = document.querySelectorAll('.form-section');

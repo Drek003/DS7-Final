@@ -31,6 +31,13 @@
         </li>
         <?php if (isAdmin()): ?>
         <li>
+            <a href="/DS7-Final/views/customers/index.php" class="nav-link text-white">
+                <i class="fas fa-users me-2"></i> Clientes
+            </a>
+        </li>
+        <?php endif; ?>
+        <?php if (isAdmin()): ?>
+        <li>
             <a class="nav-link text-white dropdown-toggle" data-bs-toggle="collapse" href="#adminMenu" role="button" aria-expanded="false" aria-controls="adminMenu">
                 <i class="fas fa-cog me-2"></i> Administración
             </a>
@@ -41,8 +48,16 @@
                     <li><hr class="dropdown-divider"></li>
                     <li><a href="/DS7-Final/views/categories/index.php" class="nav-link text-white"><i class="fas fa-edit me-2"></i> Gestionar Categorías</a></li>
                     <li><a href="/DS7-Final/views/products/index.php" class="nav-link text-white"><i class="fas fa-edit me-2"></i> Gestionar Productos</a></li>
+                    <li><a href="/DS7-Final/views/customers/index.php" class="nav-link text-white"><i class="fas fa-users-cog me-2"></i> Gestionar Clientes</a></li>
                 </ul>
             </div>
+        </li>
+        <?php endif; ?>
+        <?php if (isClient()): ?>
+        <li>
+            <a href="/DS7-Final/views/customers/profile.php" class="nav-link text-white">
+                <i class="fas fa-user-edit me-2"></i> Mi Perfil
+            </a>
         </li>
         <?php endif; ?>
     </ul>

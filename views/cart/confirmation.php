@@ -183,6 +183,11 @@ function formatPrice($amount) {
                                class="btn btn-success btn-action btn-lg" target="_blank">
                                 <i class="fas fa-print me-2"></i> Imprimir Factura
                             </a>
+                            <?php if (!empty($checkout_info['zip_name'])): ?>
+                            <a href="../../xml/<?php echo urlencode($checkout_info['zip_name']); ?>" class="btn btn-warning btn-action btn-lg" download>
+                                <i class="fas fa-file-archive me-2"></i> Descargar ZIP XML + Imagen
+                            </a>
+                            <?php endif; ?>
                             <a href="../products/index.php" class="btn btn-primary btn-action btn-lg">
                                 <i class="fas fa-store me-2"></i> Seguir Comprando
                             </a>

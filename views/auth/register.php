@@ -11,7 +11,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $phone = cleanInput($_POST['phone']);
     $address = cleanInput($_POST['address']);
     $city = cleanInput($_POST['city']);
-    $tax_id = cleanInput($_POST['tax_id']);
+    
+    // Procesar cédula - unir los 3 campos separados
+    $tax_id = '';
+    if (!empty($_POST['tax_id_provincia']) || !empty($_POST['tax_id_numero']) || !empty($_POST['tax_id_verificador'])) {
+        $provincia = cleanInput($_POST['tax_id_provincia']);
+        $numero = cleanInput($_POST['tax_id_numero']);
+        $verificador = cleanInput($_POST['tax_id_verificador']);
+        
+        // Completar provincia con 0 si es necesario
+        if (!empty($provincia) && strlen($provincia) == 1) {
+            $provincia = '0' . $provincia;
+        }
+        
+        // Si todos los campos están completos, formar la cédula
+        if (!empty($provincia) && !empty($numero) && !empty($verificador)) {
+            if (strlen($provincia) == 2 && strlen($numero) == 4 && (strlen($verificador) == 4 || strlen($verificador) == 5)) {
+                $tax_id = $provincia . '-' . $numero . '-' . $verificador;
+            }
+        }
+    }
+    
     $customer_type = cleanInput($_POST['customer_type']);
     $password = $_POST['password'];
     $password_confirm = $_POST['password_confirm'];
@@ -19,18 +39,125 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $errors = [];
     
     // Validaciones
+    // Validación del nombre - solo letras, espacios y algunos caracteres especiales permitidos
     if (empty($name)) {
         $errors[] = "El nombre es obligatorio";
+    } elseif (!preg_match("/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-'\.]+$/", $name)) {
+        $errors[] = "El nombre solo puede contener letras, espacios, guiones, apostrofes y puntos";
+    } elseif (strlen($name) < 2 || strlen($name) > 100) {
+        $errors[] = "El nombre debe tener entre 2 y 100 caracteres";
     }
     
+    // Validación del email
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "El email es obligatorio y debe tener un formato válido";
+    } elseif (strlen($email) > 150) {
+        $errors[] = "El email no puede exceder 150 caracteres";
     }
     
-    if (empty($password) || strlen($password) < 6) {
+    // Validación del teléfono - debe empezar con +507 y tener formato válido
+    if (!empty($phone)) {
+        // Verificar que empiece con +507
+        if (!preg_match("/^\+507\s/", $phone)) {
+            $errors[] = "El teléfono debe empezar con +507";
+        } else {
+            // Extraer solo los números después del código de país
+            $phone_clean = preg_replace('/^\+507\s/', '', $phone);
+            $phone_clean = preg_replace('/[\s\-\(\)]/', '', $phone_clean);
+            
+            if (!preg_match("/^[0-9]+$/", $phone_clean)) {
+                $errors[] = "El teléfono solo puede contener números, espacios, guiones y paréntesis después del código de país";
+            } elseif (strlen($phone_clean) < 7 || strlen($phone_clean) > 8) {
+                $errors[] = "El teléfono debe tener entre 7 y 8 dígitos después del código de país (+507)";
+            }
+        }
+    }
+    
+    // Validación de la dirección
+    if (!empty($address) && strlen($address) > 255) {
+        $errors[] = "La dirección no puede exceder 255 caracteres";
+    }
+    
+    // Validación de la ciudad - solo letras, espacios y algunos caracteres especiales
+    if (!empty($city)) {
+        if (!preg_match("/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-'\.]+$/", $city)) {
+            $errors[] = "La ciudad solo puede contener letras, espacios, guiones, apostrofes y puntos";
+        } elseif (strlen($city) > 100) {
+            $errors[] = "La ciudad no puede exceder 100 caracteres";
+        }
+    }
+    
+    // Validación del RUC/Cédula - formato ##-####-##### y primera parte 01-13
+    if (!empty($_POST['tax_id_provincia']) || !empty($_POST['tax_id_numero']) || !empty($_POST['tax_id_verificador'])) {
+        $provincia = cleanInput($_POST['tax_id_provincia']);
+        $numero = cleanInput($_POST['tax_id_numero']);
+        $verificador = cleanInput($_POST['tax_id_verificador']);
+        
+        // Validar que todos los campos estén completos si se empezó a llenar alguno
+        if (empty($provincia) || empty($numero) || empty($verificador)) {
+            $errors[] = "Si ingresa la cédula, debe completar todos los campos (provincia, número y verificador)";
+        } else {
+            // Completar provincia con 0 si es necesario
+            if (strlen($provincia) == 1) {
+                $provincia = '0' . $provincia;
+            }
+            
+            // Validar longitudes
+            if (strlen($provincia) != 2) {
+                $errors[] = "El código de provincia debe tener 2 dígitos";
+            }
+            if (strlen($numero) != 4) {
+                $errors[] = "El número de cédula debe tener 4 dígitos";
+            }
+            if (strlen($verificador) != 4 && strlen($verificador) != 5) {
+                $errors[] = "El verificador de cédula debe tener 4 o 5 dígitos";
+            }
+            
+            // Validar que solo contengan números
+            if (!preg_match("/^[0-9]+$/", $provincia)) {
+                $errors[] = "El código de provincia solo puede contener números";
+            }
+            if (!preg_match("/^[0-9]+$/", $numero)) {
+                $errors[] = "El número de cédula solo puede contener números";
+            }
+            if (!preg_match("/^[0-9]+$/", $verificador)) {
+                $errors[] = "El verificador de cédula solo puede contener números";
+            }
+            
+            // Validar rango de provincia (01-13)
+            if (empty($errors)) {
+                $provincia_num = (int)$provincia;
+                if ($provincia_num < 1 || $provincia_num > 13) {
+                    $errors[] = "El código de provincia debe estar entre 01 y 13";
+                }
+                
+                // Si todo está bien, formar la cédula completa
+                if (empty($errors)) {
+                    $tax_id = $provincia . '-' . $numero . '-' . $verificador;
+                }
+            }
+        }
+    }
+    
+    // Validación del tipo de cliente
+    if (empty($customer_type)) {
+        $errors[] = "El tipo de cliente es obligatorio";
+    } elseif (!in_array($customer_type, ['persona', 'empresa'])) {
+        $errors[] = "El tipo de cliente debe ser 'persona' o 'empresa'";
+    }
+    
+    // Validación de la contraseña
+    if (empty($password)) {
+        $errors[] = "La contraseña es obligatoria";
+    } elseif (strlen($password) < 6) {
         $errors[] = "La contraseña debe tener al menos 6 caracteres";
+    } elseif (strlen($password) > 255) {
+        $errors[] = "La contraseña no puede exceder 255 caracteres";
+    } elseif (!preg_match("/^(?=.*[a-zA-Z])(?=.*\d)/", $password)) {
+        $errors[] = "La contraseña debe contener al menos una letra y un número";
     }
     
+    // Validación de confirmación de contraseña
     if ($password !== $password_confirm) {
         $errors[] = "Las contraseñas no coinciden";
     }

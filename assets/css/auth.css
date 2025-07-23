@@ -104,6 +104,49 @@
 }
 
 /* ===========================================
+   SELECTOR Y OPCIONES - FIX ESPECÍFICO
+   =========================================== */
+.register-form select,
+.register-form .form-select {
+    background-color: #2d3748 !important;
+    border: 1px solid #4a5568 !important;
+    color: #ffffff !important;
+    padding: 12px !important;
+    border-radius: 8px !important;
+    width: 100% !important;
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 12px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px 12px !important;
+    padding-right: 40px !important;
+}
+
+.register-form select option,
+.register-form .form-select option {
+    background-color: #2d3748 !important;
+    color: #ffffff !important;
+    padding: 8px 12px !important;
+    border: none !important;
+}
+
+.register-form select option:hover,
+.register-form .form-select option:hover {
+    background-color: #4a5568 !important;
+    color: #ffffff !important;
+}
+
+.register-form select option:selected,
+.register-form .form-select option:selected {
+    background-color: #4a90e2 !important;
+    color: #ffffff !important;
+}
+
+/* ===========================================
    MENSAJES DE ERROR
    =========================================== */
 .error-message {
@@ -127,4 +170,49 @@
     display: block !important;
     margin: 0 auto !important;
     text-align: center !important;
+}
+
+/* ===========================================
+   FIX ADICIONAL PARA SELECTORES EN DARK MODE
+   =========================================== */
+select,
+.form-select {
+    color: #ffffff !important;
+    background-color: #2d3748 !important;
+}
+
+select option {
+    background-color: #2d3748 !important;
+    color: #ffffff !important;
+}
+
+/* Fix específico para Chrome y Safari */
+select::-webkit-scrollbar {
+    width: 8px;
+}
+
+select::-webkit-scrollbar-track {
+    background: #2d3748;
+}
+
+select::-webkit-scrollbar-thumb {
+    background: #4a5568;
+    border-radius: 4px;
+}
+
+select::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
+
+/* Fix para Firefox */
+@-moz-document url-prefix() {
+    select {
+        background-color: #2d3748 !important;
+        color: #ffffff !important;
+    }
+    
+    select option {
+        background-color: #2d3748 !important;
+        color: #ffffff !important;
+    }
 }

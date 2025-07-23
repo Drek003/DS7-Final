@@ -68,6 +68,124 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link href="../../assets/css/custom.css" rel="stylesheet">
     <link href="../../assets/css/bootstrap-dark.css" rel="stylesheet">
     <link href="../../assets/css/auth.css" rel="stylesheet">
+    <style>
+        /* Fix inmediato para selectores en dark mode */
+        select, .form-select, .form-control select {
+            background-color: #2d3748 !important;
+            color: #ffffff !important;
+            border: 1px solid #4a5568 !important;
+            padding: 6px 12px !important;
+            border-radius: 6px !important;
+            height: 38px !important;
+            font-size: 14px !important;
+        }
+        
+        select option, .form-select option, .form-control option {
+            background-color: #2d3748 !important;
+            color: #ffffff !important;
+            padding: 8px 12px !important;
+        }
+        
+        select option:hover, .form-select option:hover, .form-control option:hover {
+            background-color: #4a5568 !important;
+            color: #ffffff !important;
+        }
+        
+        select option:checked, .form-select option:checked, .form-control option:checked {
+            background-color: #4a5568 !important;
+            color: #ffffff !important;
+        }
+        
+        #reg_customer_type {
+            background-color: #2d3748 !important;
+            color: #ffffff !important;
+            border: 1px solid #4a5568 !important;
+            padding: 6px 12px !important;
+            border-radius: 6px !important;
+            font-size: 14px !important;
+            height: 38px !important;
+        }
+        
+        #reg_customer_type option {
+            background-color: #2d3748 !important;
+            color: #ffffff !important;
+            padding: 8px 12px !important;
+        }
+        
+        /* Asegurar visibilidad del texto en todos los navegadores */
+        #reg_customer_type:focus {
+            background-color: #2d3748 !important;
+            color: #ffffff !important;
+            border-color: #007bff !important;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+        }
+        
+        /* Estilos para los campos de cédula separados */
+        .cedula-container {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .cedula-container input {
+            text-align: center;
+            font-family: monospace;
+            font-weight: bold;
+            height: 38px !important;
+            padding: 6px 8px !important;
+            border-radius: 6px !important;
+        }
+        
+        .cedula-container span {
+            font-weight: bold;
+            font-size: 16px;
+            color: #ffffff;
+            line-height: 1;
+        }
+        
+        /* Asegurar que todos los form-control tengan la misma altura */
+        .register-form .form-control,
+        .register-form .form-select {
+            height: 38px !important;
+            padding: 6px 12px !important;
+            border-radius: 6px !important;
+            font-size: 14px !important;
+        }
+        
+        /* Alineación específica para los grupos de formulario */
+        .register-form .form-group {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            height: auto;
+        }
+        
+        .register-form .form-group label {
+            margin-bottom: 4px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        /* Espaciado consistente entre filas */
+        .register-form .row {
+            margin-bottom: 0;
+        }
+        
+        .register-form .row .col-md-6 {
+            padding-left: 7.5px;
+            padding-right: 7.5px;
+        }
+        
+        /* Mejorar la alineación del contenedor de cédula */
+        .cedula-container {
+            display: flex !important;
+            gap: 6px !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            flex-wrap: nowrap !important;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -181,6 +299,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <div class="form-group">
                                     <label for="reg_name">Nombre Completo *</label>
                                     <input type="text" id="reg_name" name="name" class="form-control" 
+                                           pattern="[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-'\.]+"
+                                           title="Solo letras, espacios, guiones, apostrofes y puntos"
+                                           maxlength="100"
                                            value="<?php echo htmlspecialchars($register_data['name'] ?? ''); ?>" required>
                                 </div>
                             </div>
@@ -188,6 +309,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <div class="form-group">
                                     <label for="reg_email">Email *</label>
                                     <input type="email" id="reg_email" name="email" class="form-control" 
+                                           placeholder="ejemplo@correo.com"
+                                           maxlength="150"
                                            value="<?php echo htmlspecialchars($register_data['email'] ?? ''); ?>" required>
                                 </div>
                             </div>
@@ -198,14 +321,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <div class="form-group">
                                     <label for="reg_phone">Teléfono</label>
                                     <input type="text" id="reg_phone" name="phone" class="form-control"
+                                           placeholder="+507 6123-4567"
+                                           title="Solo números, espacios, guiones y paréntesis"
                                            value="<?php echo htmlspecialchars($register_data['phone'] ?? ''); ?>">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="reg_tax_id">Cédula/RUC</label>
-                                    <input type="text" id="reg_tax_id" name="tax_id" class="form-control"
-                                           value="<?php echo htmlspecialchars($register_data['tax_id'] ?? ''); ?>">
+                                    <label for="reg_customer_type">Tipo de Cliente</label>
+                                    <select id="reg_customer_type" name="customer_type" class="form-control">
+                                        <option value="persona" <?php echo ($register_data['customer_type'] ?? '') === 'persona' ? 'selected' : ''; ?>>Cliente</option>
+                                        <option value="empresa" <?php echo ($register_data['customer_type'] ?? '') === 'empresa' ? 'selected' : ''; ?>>Empresa</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -213,6 +340,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="form-group">
                             <label for="reg_address">Dirección</label>
                             <input type="text" id="reg_address" name="address" class="form-control"
+                                   placeholder="Ej: Calle 50, Edificio Torre Global, Piso 15"
+                                   maxlength="255"
                                    value="<?php echo htmlspecialchars($register_data['address'] ?? ''); ?>">
                         </div>
                         
@@ -221,28 +350,59 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <div class="form-group">
                                     <label for="reg_city">Ciudad</label>
                                     <input type="text" id="reg_city" name="city" class="form-control" 
+                                           pattern="[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-'\.]+"
+                                           title="Solo letras, espacios, guiones, apostrofes y puntos"
+                                           maxlength="100"
                                            value="<?php echo htmlspecialchars($register_data['city'] ?? 'Ciudad de Panamá'); ?>">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="reg_customer_type">Tipo de Cliente</label>
-                                    <select id="reg_customer_type" name="customer_type" class="form-select">
-                                        <option value="individual" <?php echo ($register_data['customer_type'] ?? '') === 'individual' ? 'selected' : ''; ?>>Individual</option>
-                                        <option value="empresa" <?php echo ($register_data['customer_type'] ?? '') === 'empresa' ? 'selected' : ''; ?>>Empresa</option>
-                                    </select>
+                                    <label for="reg_tax_id">Cédula/RUC</label>
+                                    <div class="cedula-container">
+                                        <input type="text" id="reg_tax_id_provincia" name="tax_id_provincia" class="form-control" 
+                                               maxlength="2" 
+                                               style="flex: 0 0 50px; min-width: 50px;"
+                                               title="Código de provincia (01 a 13)"
+                                               value="<?php echo htmlspecialchars(explode('-', $register_data['tax_id'] ?? '')[0] ?? ''); ?>">
+                                        <span>-</span>
+                                        <input type="text" id="reg_tax_id_numero" name="tax_id_numero" class="form-control" 
+                                               maxlength="4" 
+                                               style="flex: 0 0 70px; min-width: 70px;"
+                                               title="4 dígitos del número"
+                                               value="<?php echo htmlspecialchars(explode('-', $register_data['tax_id'] ?? '')[1] ?? ''); ?>">
+                                        <span>-</span>
+                                        <input type="text" id="reg_tax_id_verificador" name="tax_id_verificador" class="form-control" 
+                                               maxlength="5" 
+                                               style="flex: 0 0 80px; min-width: 80px;"
+                                               title="4 o 5 dígitos verificadores"
+                                               value="<?php echo htmlspecialchars(explode('-', $register_data['tax_id'] ?? '')[2] ?? ''); ?>">
+                                        <!-- Campo oculto que contendrá la cédula completa -->
+                                        <input type="hidden" id="reg_tax_id" name="tax_id" value="<?php echo htmlspecialchars($register_data['tax_id'] ?? ''); ?>">
+                                    </div>
+                                    <small class="text-muted mt-1" style="font-size: 11px;">Provincia (01-13) - 4 dígitos - 4 o 5 dígitos</small>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="reg_password">Contraseña *</label>
-                            <input type="password" id="reg_password" name="password" class="form-control" required minlength="6">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="reg_password_confirm">Confirmar Contraseña *</label>
-                            <input type="password" id="reg_password_confirm" name="password_confirm" class="form-control" required>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="reg_password">Contraseña *</label>
+                                    <input type="password" id="reg_password" name="password" class="form-control" 
+                                           title="Mínimo 6 caracteres, debe contener al menos una letra y un número"
+                                           maxlength="255"
+                                           required minlength="6">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="reg_password_confirm">Confirmar Contraseña *</label>
+                                    <input type="password" id="reg_password_confirm" name="password_confirm" class="form-control" 
+                                           title="Debe coincidir con la contraseña anterior"
+                                           required>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="d-flex gap-2 mt-4">
@@ -261,7 +421,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="text-center mt-4">
                     <small style="color: var(--text-muted);">
                         <strong>Demo Admin:</strong> admin_tech/admin123<br>
-                        <strong>Demo Cliente:</strong> juan.perez@email.com/cliente123
+                        <strong>Demo Cliente:</strong> consultor_V/con123
                     </small>
                 </div>
             </div>
@@ -308,16 +468,301 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
         
-        // Validate password confirmation
-        document.getElementById('reg_password_confirm').addEventListener('input', function() {
-            const password = document.getElementById('reg_password').value;
-            const confirm = this.value;
+        // Validaciones del formulario de registro
+        document.addEventListener('DOMContentLoaded', function() {
+            const regForm = document.querySelector('form[action="register.php"]');
+            const nameInput = document.getElementById('reg_name');
+            const emailInput = document.getElementById('reg_email');
+            const phoneInput = document.getElementById('reg_phone');
+            const taxIdProvinciaInput = document.getElementById('reg_tax_id_provincia');
+            const taxIdNumeroInput = document.getElementById('reg_tax_id_numero');
+            const taxIdVerificadorInput = document.getElementById('reg_tax_id_verificador');
+            const taxIdHiddenInput = document.getElementById('reg_tax_id');
+            const cityInput = document.getElementById('reg_city');
+            const passwordInput = document.getElementById('reg_password');
+            const confirmPasswordInput = document.getElementById('reg_password_confirm');
             
-            if (confirm && password !== confirm) {
-                this.setCustomValidity('Las contraseñas no coinciden');
-            } else {
-                this.setCustomValidity('');
+            // Validación del nombre - solo letras, espacios y caracteres especiales permitidos
+            nameInput.addEventListener('input', function() {
+                const namePattern = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-'\.]+$/;
+                if (this.value && !namePattern.test(this.value)) {
+                    this.setCustomValidity('El nombre solo puede contener letras, espacios, guiones, apostrofes y puntos');
+                } else if (this.value.length > 100) {
+                    this.setCustomValidity('El nombre no puede exceder 100 caracteres');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+            
+            // Validación del teléfono - solo números, espacios, guiones y paréntesis
+            phoneInput.addEventListener('input', function() {
+                let value = this.value;
+                
+                // Si el campo está vacío o el usuario borra todo, agregar +507
+                if (value === '' || value === '+') {
+                    this.value = '+507 ';
+                    return;
+                }
+                
+                // Si no empieza con +507, agregarlo
+                if (!value.startsWith('+507')) {
+                    // Si empieza con 507, agregar el +
+                    if (value.startsWith('507')) {
+                        this.value = '+' + value;
+                        value = this.value;
+                    } else {
+                        // Si no tiene el código, agregarlo
+                        this.value = '+507 ' + value.replace(/^\+?/, '');
+                        value = this.value;
+                    }
+                }
+                
+                // Limpiar y formatear - permitir solo números después del código de país
+                let cleanValue = value.replace('+507 ', '');
+                cleanValue = cleanValue.replace(/[^\d\s\-\(\)]/g, '');
+                this.value = '+507 ' + cleanValue;
+                
+                // Validar longitud del número (sin el código de país)
+                const phoneClean = cleanValue.replace(/[\s\-\(\)]/g, '');
+                if (phoneClean.length > 0 && (phoneClean.length < 7 || phoneClean.length > 8)) {
+                    this.setCustomValidity('El teléfono debe tener entre 7 y 8 dígitos después del código de país');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+            
+            // Agregar +507 cuando el campo recibe focus si está vacío
+            phoneInput.addEventListener('focus', function() {
+                if (this.value === '') {
+                    this.value = '+507 ';
+                }
+            });
+            
+            // Validar que no se borre el código de país
+            phoneInput.addEventListener('keydown', function(e) {
+                const cursorPosition = this.selectionStart;
+                const currentValue = this.value;
+                
+                // No permitir borrar el código de país +507
+                if ((e.key === 'Backspace' || e.key === 'Delete') && cursorPosition <= 5) {
+                    e.preventDefault();
+                }
+                
+                // No permitir posicionar el cursor antes del espacio después de +507
+                if (e.key === 'ArrowLeft' && cursorPosition <= 5) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Asegurar que el cursor no se posicione antes del código de país
+            phoneInput.addEventListener('click', function() {
+                if (this.selectionStart < 5) {
+                    this.setSelectionRange(5, 5);
+                }
+            });
+            
+            // Validaciones de la cédula/RUC - 3 campos separados
+            
+            // Campo 1: Provincia (01-13) - acepta 1 o 2 dígitos
+            taxIdProvinciaInput.addEventListener('input', function() {
+                // Solo números
+                this.value = this.value.replace(/\D/g, '');
+                
+                // Limitar a 2 dígitos
+                if (this.value.length > 2) {
+                    this.value = this.value.substring(0, 2);
+                }
+                
+                // Validar rango 1-13
+                const provincia = parseInt(this.value);
+                if (this.value && (provincia < 1 || provincia > 13)) {
+                    this.setCustomValidity('El código de provincia debe estar entre 01 y 13');
+                } else {
+                    this.setCustomValidity('');
+                }
+                
+                // Completar con 0 al frente si es un solo dígito y se mueve al siguiente campo
+                if (this.value.length === 1 && provincia >= 1 && provincia <= 9) {
+                    // No hacer nada aquí, dejar que el usuario decida
+                } else if (this.value.length === 2 || (this.value.length === 1 && provincia > 9)) {
+                    // Moverse al siguiente campo
+                    taxIdNumeroInput.focus();
+                }
+                
+                updateFullTaxId();
+            });
+            
+            // Completar con 0 al salir del campo si es necesario
+            taxIdProvinciaInput.addEventListener('blur', function() {
+                if (this.value.length === 1) {
+                    this.value = '0' + this.value;
+                    updateFullTaxId();
+                }
+            });
+            
+            // Campo 2: Número central (4 dígitos)
+            taxIdNumeroInput.addEventListener('input', function() {
+                // Solo números
+                this.value = this.value.replace(/\D/g, '');
+                
+                // Limitar a 4 dígitos
+                if (this.value.length > 4) {
+                    this.value = this.value.substring(0, 4);
+                }
+                
+                // Moverse al siguiente campo cuando esté completo
+                if (this.value.length === 4) {
+                    taxIdVerificadorInput.focus();
+                }
+                
+                updateFullTaxId();
+            });
+            
+            // Campo 3: Verificador (5 dígitos)
+            taxIdVerificadorInput.addEventListener('input', function() {
+                // Solo números
+                this.value = this.value.replace(/\D/g, '');
+                
+                // Limitar a 5 dígitos
+                if (this.value.length > 5) {
+                    this.value = this.value.substring(0, 5);
+                }
+                
+                updateFullTaxId();
+            });
+            
+            // Función para actualizar el campo oculto con la cédula completa
+            function updateFullTaxId() {
+                const provincia = taxIdProvinciaInput.value.padStart(2, '0');
+                const numero = taxIdNumeroInput.value;
+                const verificador = taxIdVerificadorInput.value;
+                
+                if (provincia && numero && verificador) {
+                    if (provincia.length === 2 && numero.length === 4 && (verificador.length === 4 || verificador.length === 5)) {
+                        taxIdHiddenInput.value = provincia + '-' + numero + '-' + verificador;
+                    } else {
+                        taxIdHiddenInput.value = '';
+                    }
+                } else {
+                    taxIdHiddenInput.value = '';
+                }
             }
+            
+            // Manejar navegación con teclas
+            taxIdProvinciaInput.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowRight' || e.key === 'Tab') {
+                    if (this.value.length >= 1) {
+                        e.preventDefault();
+                        if (this.value.length === 1) {
+                            this.value = '0' + this.value;
+                            updateFullTaxId();
+                        }
+                        taxIdNumeroInput.focus();
+                    }
+                }
+            });
+            
+            taxIdNumeroInput.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft' && this.selectionStart === 0) {
+                    e.preventDefault();
+                    taxIdProvinciaInput.focus();
+                } else if (e.key === 'ArrowRight' || e.key === 'Tab') {
+                    if (this.value.length === 4) {
+                        e.preventDefault();
+                        taxIdVerificadorInput.focus();
+                    }
+                }
+            });
+            
+            taxIdVerificadorInput.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft' && this.selectionStart === 0) {
+                    e.preventDefault();
+                    taxIdNumeroInput.focus();
+                }
+            });
+            
+            // Validación de la ciudad - solo letras, espacios y caracteres especiales permitidos
+            cityInput.addEventListener('input', function() {
+                const cityPattern = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-'\.]+$/;
+                if (this.value && !cityPattern.test(this.value)) {
+                    this.setCustomValidity('La ciudad solo puede contener letras, espacios, guiones, apostrofes y puntos');
+                } else if (this.value.length > 100) {
+                    this.setCustomValidity('La ciudad no puede exceder 100 caracteres');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+            
+            // Validación de la contraseña
+            passwordInput.addEventListener('input', function() {
+                const passwordPattern = /^(?=.*[a-zA-Z])(?=.*\d)/;
+                if (this.value.length < 6) {
+                    this.setCustomValidity('La contraseña debe tener al menos 6 caracteres');
+                } else if (this.value.length > 255) {
+                    this.setCustomValidity('La contraseña no puede exceder 255 caracteres');
+                } else if (!passwordPattern.test(this.value)) {
+                    this.setCustomValidity('La contraseña debe contener al menos una letra y un número');
+                } else {
+                    this.setCustomValidity('');
+                }
+                // Revalidar confirmación si ya tiene valor
+                if (confirmPasswordInput.value) {
+                    confirmPasswordInput.dispatchEvent(new Event('input'));
+                }
+            });
+            
+            // Validación de confirmación de contraseña
+            confirmPasswordInput.addEventListener('input', function() {
+                const password = passwordInput.value;
+                const confirm = this.value;
+                
+                if (confirm && password !== confirm) {
+                    this.setCustomValidity('Las contraseñas no coinciden');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+            
+            // Validación antes de enviar el formulario
+            regForm.addEventListener('submit', function(e) {
+                const inputs = [nameInput, emailInput, phoneInput, taxIdProvinciaInput, taxIdNumeroInput, taxIdVerificadorInput, cityInput, passwordInput, confirmPasswordInput];
+                let hasErrors = false;
+                
+                // Validación específica de la cédula completa
+                if (taxIdProvinciaInput.value || taxIdNumeroInput.value || taxIdVerificadorInput.value) {
+                    const provincia = taxIdProvinciaInput.value.padStart(2, '0');
+                    const numero = taxIdNumeroInput.value;
+                    const verificador = taxIdVerificadorInput.value;
+                    
+                    if (!provincia || provincia.length !== 2) {
+                        hasErrors = true;
+                        taxIdProvinciaInput.setCustomValidity('Debe ingresar el código de provincia (01-13)');
+                        taxIdProvinciaInput.reportValidity();
+                    } else if (!numero || numero.length !== 4) {
+                        hasErrors = true;
+                        taxIdNumeroInput.setCustomValidity('Debe ingresar 4 dígitos');
+                        taxIdNumeroInput.reportValidity();
+                    } else if (!verificador || (verificador.length !== 4 && verificador.length !== 5)) {
+                        hasErrors = true;
+                        taxIdVerificadorInput.setCustomValidity('Debe ingresar 4 o 5 dígitos verificadores');
+                        taxIdVerificadorInput.reportValidity();
+                    } else {
+                        // Actualizar el campo oculto antes del envío
+                        updateFullTaxId();
+                    }
+                }
+                
+                inputs.forEach(input => {
+                    if (input && !input.checkValidity()) {
+                        hasErrors = true;
+                        input.reportValidity();
+                    }
+                });
+                
+                if (hasErrors) {
+                    e.preventDefault();
+                }
+            });
         });
         
         // Add shake animation to form on error

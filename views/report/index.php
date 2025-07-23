@@ -1,9 +1,10 @@
 <?php
 // report_interface.php
-// Interfaz para generar reporte de ventas filtrable y exportable a XML/JSON
+// Interfaz para generar reporte de ventas filtrable y exportable a XML/JSON via Web Services
 
 // 1) Incluye tu configuración general (que ya hace session_start() y define isAdmin(), isLoggedIn(), etc.)
 require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../WebService/nusoap.php';
 
 // Verificar que el usuario esté logueado
 if (!isLoggedIn()) {
@@ -37,12 +38,86 @@ try {
     exit;
 }
 
+// Funciones para Web Service
+function callWebServiceExport($action, $fecha_inicio, $fecha_fin, $cliente, $producto) {
+    $wsdl_url = 'http://localhost/DS7-Final/WebService/serverProy.php?wsdl';
+    
+    try {
+        $client = new nusoap_client($wsdl_url, true);
+        
+        $err = $client->getError();
+        if ($err) {
+            throw new Exception('Error al inicializar cliente SOAP: ' . $err);
+        }
+        
+        if ($action === 'json') {
+            $result = $client->call('generateReportJSON', array(
+                'fecha_inicio' => $fecha_inicio,
+                'fecha_fin' => $fecha_fin,
+                'cliente' => $cliente,
+                'producto' => $producto
+            ));
+        } else {
+            $result = $client->call('generateReportXML', array(
+                'fecha_inicio' => $fecha_inicio,
+                'fecha_fin' => $fecha_fin,
+                'cliente' => $cliente,
+                'producto' => $producto
+            ));
+        }
+        
+        if ($client->fault) {
+            throw new Exception('Fallo en llamada SOAP: ' . print_r($result, true));
+        }
+        
+        $err = $client->getError();
+        if ($err) {
+            throw new Exception('Error SOAP: ' . $err);
+        }
+        
+        $response = json_decode($result, true);
+        
+        if ($response && $response['success'] && isset($response['data'])) {
+            $filename = 'reporte_ventas_' . date('Ymd_His') . '.' . $action;
+            
+            if ($action === 'json') {
+                header('Content-Type: application/json; charset=utf-8');
+            } else {
+                header('Content-Type: application/xml; charset=utf-8');
+            }
+            
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Cache-Control: no-cache, must-revalidate');
+            header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
+            
+            echo $response['data'];
+            exit;
+        } else {
+            throw new Exception($response['message'] ?? 'Error al generar archivo');
+        }
+        
+    } catch (Exception $e) {
+        $_SESSION['error'] = 'Error en Web Service: ' . $e->getMessage();
+        header('Location: ' . $_SERVER['REQUEST_URI']);
+        exit;
+    }
+}
+
 // 1) Recoger filtros desde $_GET
 $fecha_inicio = $_GET['fecha_inicio'] ?? '';
 $fecha_fin    = $_GET['fecha_fin']    ?? '';
 $cliente_id   = $_GET['cliente']      ?? '';
 $producto_id  = $_GET['producto']     ?? '';
 $export       = $_GET['export']       ?? '';
+
+// Si se solicita exportación, usar Web Service
+if ($export === 'json') {
+    callWebServiceExport('json', $fecha_inicio, $fecha_fin, $cliente_id, $producto_id);
+}
+
+if ($export === 'xml') {
+    callWebServiceExport('xml', $fecha_inicio, $fecha_fin, $cliente_id, $producto_id);
+}
 
 // 2) Cargar lista de clientes (siempre completa)
 $clientes = $pdo
@@ -126,30 +201,6 @@ if ($where) {
 $stmt    = $pdo->prepare($sql);
 $stmt->execute($params);
 $results = $stmt->fetchAll();
-
-// Exportar si se solicita
-if ($export === 'json') {
-    $filename = 'reporte_ventas_' . date('Ymd_His') . '.json';
-    header('Content-Type: application/json; charset=utf-8');
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    echo json_encode($results, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-    exit;
-}
-
-if ($export === 'xml') {
-    $filename = 'reporte_ventas_' . date('Ymd_His') . '.xml';
-    header('Content-Type: application/xml; charset=utf-8');
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    $xml = new SimpleXMLElement('<ventas/>');
-    foreach ($results as $row) {
-        $item = $xml->addChild('venta');
-        foreach ($row as $key => $value) {
-            $item->addChild($key, htmlspecialchars($value));
-        }
-    }
-    echo $xml->asXML();
-    exit;
-}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -272,6 +323,32 @@ if ($export === 'xml') {
 
   </div>
 </main>
+
+<!-- Mostrar mensajes de error si existen -->
+<?php if (isset($_SESSION['error'])): ?>
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div class="toast show" role="alert">
+    <div class="toast-header bg-danger text-white">
+      <strong class="me-auto">Error</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+    </div>
+    <div class="toast-body">
+      <?= htmlspecialchars($_SESSION['error']) ?>
+    </div>
+  </div>
+</div>
+<?php unset($_SESSION['error']); endif; ?>
+
 <script src="../../assets/js/bootstrap.bundle.min.js"></script>
+<script>
+// Auto-ocultar mensajes después de 5 segundos
+setTimeout(function() {
+    var toasts = document.querySelectorAll('.toast');
+    toasts.forEach(function(toast) {
+        var bsToast = new bootstrap.Toast(toast);
+        bsToast.hide();
+    });
+}, 5000);
+</script>
 </body>
 </html>

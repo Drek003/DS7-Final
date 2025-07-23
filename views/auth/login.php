@@ -323,7 +323,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <input type="text" id="reg_phone" name="phone" class="form-control"
                                            placeholder="+507 6123-4567"
                                            title="Solo números, espacios, guiones y paréntesis"
-                                           value="<?php echo htmlspecialchars($register_data['phone'] ?? ''); ?>">
+                                           value="<?php 
+                                               $phone_value = $register_data['phone'] ?? '';
+                                               // Si no está vacío y no empieza con +507, agregarlo
+                                               if (!empty($phone_value) && strpos($phone_value, '+507') !== 0) {
+                                                   $phone_value = '+507 ' . $phone_value;
+                                               }
+                                               echo htmlspecialchars($phone_value); 
+                                           ?>">
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -364,19 +371,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                maxlength="2" 
                                                style="flex: 0 0 50px; min-width: 50px;"
                                                title="Código de provincia (01 a 13)"
-                                               value="<?php echo htmlspecialchars(explode('-', $register_data['tax_id'] ?? '')[0] ?? ''); ?>">
+                                               value="<?php 
+                                                   // Priorizar campos individuales sobre el tax_id completo
+                                                   if (isset($register_data['tax_id_provincia'])) {
+                                                       echo htmlspecialchars($register_data['tax_id_provincia']);
+                                                   } else {
+                                                       echo htmlspecialchars(explode('-', $register_data['tax_id'] ?? '')[0] ?? '');
+                                                   }
+                                               ?>">
                                         <span>-</span>
                                         <input type="text" id="reg_tax_id_numero" name="tax_id_numero" class="form-control" 
                                                maxlength="4" 
                                                style="flex: 0 0 70px; min-width: 70px;"
                                                title="4 dígitos del número"
-                                               value="<?php echo htmlspecialchars(explode('-', $register_data['tax_id'] ?? '')[1] ?? ''); ?>">
+                                               value="<?php 
+                                                   // Priorizar campos individuales sobre el tax_id completo
+                                                   if (isset($register_data['tax_id_numero'])) {
+                                                       echo htmlspecialchars($register_data['tax_id_numero']);
+                                                   } else {
+                                                       echo htmlspecialchars(explode('-', $register_data['tax_id'] ?? '')[1] ?? '');
+                                                   }
+                                               ?>">
                                         <span>-</span>
                                         <input type="text" id="reg_tax_id_verificador" name="tax_id_verificador" class="form-control" 
                                                maxlength="5" 
                                                style="flex: 0 0 80px; min-width: 80px;"
                                                title="4 o 5 dígitos verificadores"
-                                               value="<?php echo htmlspecialchars(explode('-', $register_data['tax_id'] ?? '')[2] ?? ''); ?>">
+                                               value="<?php 
+                                                   // Priorizar campos individuales sobre el tax_id completo
+                                                   if (isset($register_data['tax_id_verificador'])) {
+                                                       echo htmlspecialchars($register_data['tax_id_verificador']);
+                                                   } else {
+                                                       echo htmlspecialchars(explode('-', $register_data['tax_id'] ?? '')[2] ?? '');
+                                                   }
+                                               ?>">
                                         <!-- Campo oculto que contendrá la cédula completa -->
                                         <input type="hidden" id="reg_tax_id" name="tax_id" value="<?php echo htmlspecialchars($register_data['tax_id'] ?? ''); ?>">
                                     </div>

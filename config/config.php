@@ -2,7 +2,7 @@
 session_start();
 
 // Configuraciones generales
-define('BASE_URL', 'http://localhost/WEB/test/');
+define('BASE_URL', 'http://localhost/DS7-Final/');
 define('UPLOAD_PATH', 'assets/images/');
 
 // Función para verificar si el usuario está logueado
@@ -27,6 +27,11 @@ function isClient() {
 
 // Función para verificar si el usuario es admin o consultor
 function isAdminOrConsultor() {
+    return isAdmin() || isConsultor();
+}
+
+// Función para verificar acceso a reportes (solo Admin y Consultor)
+function canAccessReports() {
     return isAdmin() || isConsultor();
 }
 

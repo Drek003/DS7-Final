@@ -4,6 +4,17 @@
 
 // 1) Configuración general
 require_once __DIR__ . '/../../config/config.php';
+
+// Verificar que el usuario esté logueado
+if (!isLoggedIn()) {
+    redirect('../auth/login.php');
+}
+
+// Verificar que el usuario tenga permisos para acceder a reportes (Solo Admin y Consultor)
+if (!canAccessReports()) {
+    $_SESSION['error'] = 'No tienes permisos para acceder a los reportes';
+    redirect('../../index.php');
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">

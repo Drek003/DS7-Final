@@ -2,15 +2,26 @@
 // report_interface.php
 // Interfaz para generar reporte de ventas filtrable y exportable a XML/JSON
 
+// 1) Incluye tu configuración general (que ya hace session_start() y define isAdmin(), isLoggedIn(), etc.)
+require_once __DIR__ . '/../../config/config.php';
+
+// Verificar que el usuario esté logueado
+if (!isLoggedIn()) {
+    redirect('../auth/login.php');
+}
+
+// Verificar que el usuario tenga permisos para acceder a reportes (Solo Admin y Consultor)
+if (!canAccessReports()) {
+    $_SESSION['error'] = 'No tienes permisos para acceder a los reportes';
+    redirect('../../index.php');
+}
+
 // Configuración de conexión a la base de datos
 $host = '127.0.0.1';
-$db   = 'ds6-2';
+$db   = 'ds7';
 $user = 'admin';
 $pass = '1234';
 $charset = 'utf8mb4';
-
-// 1) Incluye tu configuración general (que ya hace session_start() y define isAdmin(), isLoggedIn(), etc.)
-require_once __DIR__ . '/../../config/config.php';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 $options = [

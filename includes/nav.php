@@ -20,11 +20,13 @@
                 <i class="fas fa-box me-2"></i> Productos
             </a>
         </li>
+        <?php if (canAccessReports()): ?>
         <li class="nav-item">
             <a href="/DS7-Final/views/report/index.php" class="nav-link text-white">
                 <i class="fas fa-chart-bar me-2"></i> Reportes
             </a>
         </li>
+        <?php endif; ?>
         <li>
             <a href="/DS7-Final/views/cart/index.php" class="nav-link text-white d-flex align-items-center">
                 <i class="fas fa-shopping-cart me-2"></i> 

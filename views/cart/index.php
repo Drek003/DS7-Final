@@ -197,7 +197,7 @@ function formatPrice($amount) {
                                 <h4 class="mb-1">Productos en tu carrito</h4>
                                 <small class="text-muted"><?php echo $total_items; ?> <?php echo $total_items == 1 ? 'producto' : 'productos'; ?></small>
                             </div>
-                            <form method="POST" class="mt-2 mt-sm-0" onsubmit="return confirm('¿Estás seguro de que quieres vaciar el carrito?')">
+                            <form method="POST" class="mt-2 mt-sm-0">
                                 <input type="hidden" name="action" value="clear_cart">
                                 <button type="submit" class="btn btn-outline-danger btn-sm btn-cart-action">
                                     <i class="fas fa-trash me-1"></i> Vaciar Carrito
@@ -691,6 +691,51 @@ function formatPrice($amount) {
                     }
                 });
             });
+
+            // Manejar el vaciado del carrito
+            const clearCartForm = document.querySelector('.cart-header form');
+            if (clearCartForm) {
+                clearCartForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const submitBtn = clearCartForm.querySelector('button[type="submit"]');
+                    let originalHtml = '';
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        originalHtml = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Vaciando...';
+                    }
+                    // Actualizar la interfaz directamente
+                    const cartList = document.querySelector('.col-lg-8');
+                    const cartSummary = document.querySelector('.col-lg-4');
+                    if (cartList) {
+                        cartList.innerHTML = `
+                        <div class="empty-cart">
+                            <i class="fas fa-shopping-cart mb-4"></i>
+                            <h3 class="mb-3">Tu carrito está vacío</h3>
+                            <p class="mb-4">¡Explora nuestro catálogo y encuentra productos increíbles!</p>
+                            <a href="../products/index.php" class="btn btn-primary btn-cart-action btn-lg">
+                                <i class="fas fa-store me-2"></i> Ir al Catálogo
+                            </a>
+                        </div>`;
+                    }
+                    if (cartSummary) {
+                        cartSummary.innerHTML = '';
+                    }
+                    if (window.updateCartCount) window.updateCartCount(false, 0);
+                    // Hacer la petición real al endpoint AJAX
+                    const formData = new FormData(clearCartForm);
+                    fetch('clear_cart.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .finally(() => {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalHtml || '<i class=\'fas fa-trash me-1\'></i> Vaciar Carrito';
+                        }
+                    });
+                });
+            }
         });
 
         // Función para manejar el proceso de eliminación con confirmación mejorada

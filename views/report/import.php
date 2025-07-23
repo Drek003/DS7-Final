@@ -2,8 +2,23 @@
 // import.php
 // Importar reportes en XML o JSON y mostrarlos en tabla
 
-// 1) Configuración general
+// 1) Incluye config para tener session, isLoggedIn() e isAdmin()
 require_once __DIR__ . '/../../config/config.php';
+
+// 2) Si no está logueado, le mandamos al login
+if (!isLoggedIn()) {
+    redirect('../../views/auth/login.php');
+    exit;
+}
+
+// 3) Y si no es admin, le denegamos el acceso (puedes redirigirlo o mostrar un mensaje)
+if (!isAdmin()) {
+    // O bien lo mandas a una página de “No autorizado”:
+    // redirect('../../views/errors/403.php');
+    // O de vuelta al login:
+    redirect('../../views/auth/login.php');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -110,7 +125,6 @@ require_once __DIR__ . '/../../config/config.php';
 
     </div>
   </main>
-
-  <script src="../../assets/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

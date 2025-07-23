@@ -23,6 +23,13 @@ $stmt = $db->prepare($query);
 $stmt->execute([$customer_id]);
 $customer = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// Obtener username del usuario
+$query_user = "SELECT username FROM users WHERE customer_id = ?";
+$stmt_user = $db->prepare($query_user);
+$stmt_user->execute([$customer_id]);
+$user_data = $stmt_user->fetch(PDO::FETCH_ASSOC);
+$current_username = $user_data['username'] ?? '';
+
 if (!$customer) {
     redirect('../../index.php');
 }
@@ -30,6 +37,7 @@ if (!$customer) {
 // Procesar formulario de actualización
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = cleanInput($_POST['name']);
+    $username = cleanInput($_POST['username']);
     $email = cleanInput($_POST['email']);
     $phone = cleanInput($_POST['phone']);
     $address = cleanInput($_POST['address']);
@@ -43,6 +51,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validaciones
     if (empty($name)) {
         $errors[] = "El nombre es obligatorio";
+    }
+
+    if (empty($username)) {
+        $errors[] = "El nombre de usuario es obligatorio";
+    } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+        $errors[] = "El nombre de usuario solo puede contener letras, números y guiones bajos";
+    } elseif (strlen($username) < 3) {
+        $errors[] = "El nombre de usuario debe tener al menos 3 caracteres";
+    }
+
+    // Verificar si el username ya existe en otro usuario
+    if (!empty($username) && $username !== $current_username) {
+        $check_username = $db->prepare("SELECT id FROM users WHERE username = ? AND customer_id != ?");
+        $check_username->execute([$username, $customer_id]);
+        if ($check_username->fetch()) {
+            $errors[] = "Ya existe otro usuario con ese nombre de usuario";
+        }
     }
 
     if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -114,7 +139,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_customer = $db->prepare($query_customer);
             $result_customer = $stmt_customer->execute($update_fields);
 
-            // Actualizar tabla users si cambió el email o contraseña
+            // Actualizar tabla users si cambió el username, email o contraseña
+            if (!empty($username) && $username !== $current_username) {
+                $stmt_user = $db->prepare("UPDATE users SET username = ? WHERE customer_id = ?");
+                $stmt_user->execute([$username, $customer_id]);
+                $_SESSION['username'] = $username; // Actualizar session
+                $current_username = $username; // Actualizar variable local
+            }
+
             if (!empty($email) && $email !== $customer['email']) {
                 $stmt_user = $db->prepare("UPDATE users SET email = ? WHERE customer_id = ?");
                 $stmt_user->execute([$email, $customer_id]);
@@ -205,9 +237,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label for="email" class="form-label">Email</label>
-                                        <input type="email" id="email" name="email" class="form-control" 
-                                               value="<?php echo htmlspecialchars($customer['email'] ?? ''); ?>">
+                                        <label for="username" class="form-label">Nombre de Usuario *</label>
+                                        <input type="text" id="username" name="username" class="form-control" 
+                                               value="<?php echo htmlspecialchars($current_username); ?>" 
+                                               placeholder="Ej: juan_perez" required>
+                                        <small class="form-text text-muted">Solo letras, números y guiones bajos</small>
                                     </div>
                                 </div>
                             </div>
@@ -215,11 +249,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" id="email" name="email" class="form-control" 
+                                               value="<?php echo htmlspecialchars($customer['email'] ?? ''); ?>">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
                                         <label for="phone" class="form-label">Teléfono</label>
                                         <input type="text" id="phone" name="phone" class="form-control" 
                                                value="<?php echo htmlspecialchars($customer['phone'] ?? ''); ?>">
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
                                         <label for="tax_id" class="form-label">Cédula/RUC</label>
@@ -227,12 +271,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                value="<?php echo htmlspecialchars($customer['tax_id'] ?? ''); ?>">
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="form-group mb-3">
-                                <label for="address" class="form-label">Dirección</label>
-                                <input type="text" id="address" name="address" class="form-control" 
-                                       value="<?php echo htmlspecialchars($customer['address'] ?? ''); ?>">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="address" class="form-label">Dirección</label>
+                                        <input type="text" id="address" name="address" class="form-control" 
+                                               value="<?php echo htmlspecialchars($customer['address'] ?? ''); ?>">
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="row">
@@ -294,6 +339,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Validar formato de username
+        document.getElementById('username').addEventListener('input', function() {
+            const username = this.value;
+            const usernamePattern = /^[a-zA-Z0-9_]+$/;
+            
+            if (username && !usernamePattern.test(username)) {
+                this.setCustomValidity('Solo se permiten letras, números y guiones bajos');
+            } else if (username && username.length < 3) {
+                this.setCustomValidity('El nombre de usuario debe tener al menos 3 caracteres');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
         // Validar confirmación de contraseña
         document.getElementById('confirm_password').addEventListener('input', function() {
             const newPassword = document.getElementById('new_password').value;

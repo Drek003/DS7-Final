@@ -7,6 +7,7 @@ $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = cleanInput($_POST['name']);
+    $username = cleanInput($_POST['username']);
     $email = cleanInput($_POST['email']);
     $phone = cleanInput($_POST['phone']);
     $address = cleanInput($_POST['address']);
@@ -21,6 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validaciones
     if (empty($name)) {
         $errors[] = "El nombre es obligatorio";
+    }
+    
+    if (empty($username)) {
+        $errors[] = "El nombre de usuario es obligatorio";
+    } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+        $errors[] = "El nombre de usuario solo puede contener letras, números y guiones bajos";
+    } elseif (strlen($username) < 3) {
+        $errors[] = "El nombre de usuario debe tener al menos 3 caracteres";
     }
     
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -40,6 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $db = $database->getConnection();
         
         try {
+            // Verificar si el username ya existe
+            $check_username = $db->prepare("SELECT id FROM users WHERE username = ?");
+            $check_username->execute([$username]);
+            if ($check_username->fetch()) {
+                $errors[] = "Ya existe un usuario con ese nombre de usuario";
+            }
+            
             // Verificar si el email ya existe en customers
             $check_email = $db->prepare("SELECT id FROM customers WHERE email = ?");
             $check_email->execute([$email]);
@@ -88,8 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     if ($result_customer) {
                         $customer_id = $db->lastInsertId();
                         
-                        // 2. Crear usuario automáticamente
-                        $user_data = createUserForCustomer($db, $customer_id, $email, $name, $password);
+                        // 2. Crear usuario automáticamente con username personalizado
+                        $user_data = createUserForCustomer($db, $customer_id, $email, $name, $password, $username);
                         
                         if ($user_data) {
                             // Confirmar transacción

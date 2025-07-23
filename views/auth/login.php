@@ -186,11 +186,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="reg_email">Email *</label>
-                                    <input type="email" id="reg_email" name="email" class="form-control" 
-                                           value="<?php echo htmlspecialchars($register_data['email'] ?? ''); ?>" required>
+                                    <label for="reg_username">Nombre de Usuario *</label>
+                                    <input type="text" id="reg_username" name="username" class="form-control" 
+                                           placeholder="Ej: juan_perez" 
+                                           value="<?php echo htmlspecialchars($register_data['username'] ?? ''); ?>" required>
+                                    <small class="form-text text-muted">Solo letras, números y guiones bajos</small>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reg_email">Email *</label>
+                            <input type="email" id="reg_email" name="email" class="form-control" 
+                                   value="<?php echo htmlspecialchars($register_data['email'] ?? ''); ?>" required>
                         </div>
                         
                         <div class="row">
@@ -307,6 +315,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 loginFooter.style.display = 'block'; // Mostrar el botón "Registrarme como cliente"
             }
         }
+        
+        // Validate username format
+        document.getElementById('reg_username').addEventListener('input', function() {
+            const username = this.value;
+            const usernamePattern = /^[a-zA-Z0-9_]+$/;
+            
+            if (username && !usernamePattern.test(username)) {
+                this.setCustomValidity('Solo se permiten letras, números y guiones bajos');
+            } else if (username && username.length < 3) {
+                this.setCustomValidity('El nombre de usuario debe tener al menos 3 caracteres');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
         
         // Validate password confirmation
         document.getElementById('reg_password_confirm').addEventListener('input', function() {

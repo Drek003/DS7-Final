@@ -65,27 +65,32 @@ function generateTempPassword($length = 8) {
 }
 
 // Función para crear usuario de cliente automáticamente
-function createUserForCustomer($db, $customer_id, $email, $name, $password = null) {
+function createUserForCustomer($db, $customer_id, $email, $name, $password = null, $custom_username = null) {
     try {
         // Generar contraseña si no se proporciona
         if (!$password) {
             $password = generateTempPassword();
         }
         
-        // Generar username único basado en el nombre
-        $username = strtolower(str_replace([' ', '.', '@'], '_', $name));
-        $username = preg_replace('/[^a-z0-9_]/', '', $username);
-        
-        // Verificar si el username ya existe y modificarlo si es necesario
-        $check_user = $db->prepare("SELECT id FROM users WHERE username = ?");
-        $check_user->execute([$username]);
-        $counter = 1;
-        $original_username = $username;
-        
-        while ($check_user->fetch()) {
-            $username = $original_username . '_' . $counter;
+        // Usar username personalizado o generar uno basado en el nombre
+        if ($custom_username) {
+            $username = $custom_username;
+        } else {
+            // Generar username único basado en el nombre
+            $username = strtolower(str_replace([' ', '.', '@'], '_', $name));
+            $username = preg_replace('/[^a-z0-9_]/', '', $username);
+            
+            // Verificar si el username ya existe y modificarlo si es necesario
+            $check_user = $db->prepare("SELECT id FROM users WHERE username = ?");
             $check_user->execute([$username]);
-            $counter++;
+            $counter = 1;
+            $original_username = $username;
+            
+            while ($check_user->fetch()) {
+                $username = $original_username . '_' . $counter;
+                $check_user->execute([$username]);
+                $counter++;
+            }
         }
         
         // Insertar el usuario

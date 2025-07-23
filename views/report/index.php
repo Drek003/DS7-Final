@@ -273,7 +273,6 @@ if ($export === 'xml') {
     <?php else: ?>
       <div class="alert alert-secondary">No hay registros con esos filtros.</div>
     <?php endif; ?>
-
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

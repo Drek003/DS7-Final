@@ -546,8 +546,7 @@ Para reportar bugs, solicitar funcionalidades o soporte técnico:
 
 ## Créditos y Reconocimientos
 
-### Desarrollador Principal
-- **Derek** - [@Drek003](https://github.com/Drek003)
+
 
 ### Tecnologías y Librerías
 - Bootstrap 5 - Framework CSS

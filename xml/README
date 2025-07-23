@@ -1,0 +1,40 @@
+Para instalar la extensión GD en XAMPP en Windows:
+
+1. **Detén Apache** desde el panel de control de XAMPP.
+
+2. **Edita el archivo `php.ini`:**
+   - Ve a la carpeta donde tienes XAMPP, normalmente:  
+     php.ini
+   - Ábrelo con un editor de texto (por ejemplo, Notepad).
+
+3. **Busca la línea:**
+   ```
+   ;extension=gd
+   ```
+   o
+   ```
+   ;extension=gd2
+   ```
+   (puede variar según la versión de PHP).
+
+4. **Descomenta la línea** quitando el punto y coma `;` al inicio. Debe quedar así:
+   ```
+   extension=gd
+   ```
+   o
+   ```
+   extension=gd2
+   ```
+
+5. **Guarda el archivo** y cierra el editor.
+
+6. **Reinicia Apache** desde el panel de control de XAMPP.
+
+7. **Verifica que está activa:**
+   - Crea un archivo llamado `info.php` en tu carpeta `htdocs` con este contenido:
+     ```php
+     <?php phpinfo(); ?>
+     ```
+   - Abre en tu navegador:  
+     `http://localhost/info.php`
+   - Busca “gd” en la página. Si ves una tabla con información de GD, ¡está funcionando!

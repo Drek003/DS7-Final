@@ -8,9 +8,8 @@
 -- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
 SET time_zone = "+00:00";
-
+SET FOREIGN_KEY_CHECKS = 0;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -20,12 +19,18 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `ds7`
 --
+CREATE DATABASE IF NOT EXISTS `ds7` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `ds7`;
+
+-- Eliminar función si existe
+DROP FUNCTION IF EXISTS `get_next_invoice_number`;
 
 DELIMITER $$
 --
 -- Funciones
 --
-CREATE DEFINER=`root`@`localhost` FUNCTION `get_next_invoice_number` () RETURNS VARCHAR(50) CHARSET utf8mb4 COLLATE utf8mb4_general_ci DETERMINISTIC READS SQL DATA BEGIN
+CREATE FUNCTION `get_next_invoice_number` () RETURNS VARCHAR(50) CHARSET utf8mb4 COLLATE utf8mb4_general_ci DETERMINISTIC READS SQL DATA 
+BEGIN
     DECLARE next_number INT;
     DECLARE current_year INT;
     DECLARE invoice_num VARCHAR(50);
@@ -61,6 +66,7 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `categories`
 --
 
+DROP TABLE IF EXISTS `categories`;
 CREATE TABLE `categories` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
@@ -91,6 +97,7 @@ INSERT INTO `categories` (`id`, `name`, `description`, `image`, `created_at`) VA
 -- Estructura de tabla para la tabla `customers`
 --
 
+DROP TABLE IF EXISTS `customers`;
 CREATE TABLE `customers` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
@@ -125,6 +132,7 @@ INSERT INTO `customers` (`id`, `name`, `email`, `password`, `phone`, `address`, 
 -- Estructura de tabla para la tabla `invoices`
 --
 
+DROP TABLE IF EXISTS `invoices`;
 CREATE TABLE `invoices` (
   `id` int(11) NOT NULL,
   `sale_id` int(11) NOT NULL,
@@ -158,6 +166,7 @@ INSERT INTO `invoices` (`id`, `sale_id`, `invoice_number`, `invoice_date`, `due_
 -- Estructura de tabla para la tabla `invoice_sequence`
 --
 
+DROP TABLE IF EXISTS `invoice_sequence`;
 CREATE TABLE `invoice_sequence` (
   `id` int(11) NOT NULL,
   `year` int(4) NOT NULL,
@@ -177,28 +186,10 @@ INSERT INTO `invoice_sequence` (`id`, `year`, `last_number`, `prefix`, `created_
 -- --------------------------------------------------------
 
 --
--- Estructura Stand-in para la vista `pending_invoices`
--- (Véase abajo para la vista actual)
---
-CREATE TABLE `pending_invoices` (
-`id` int(11)
-,`invoice_number` varchar(50)
-,`invoice_date` datetime
-,`due_date` datetime
-,`total_amount` decimal(10,2)
-,`invoice_status` enum('borrador','enviada','pagada','vencida','cancelada')
-,`customer_name` varchar(100)
-,`customer_email` varchar(100)
-,`customer_phone` varchar(20)
-,`days_overdue` int(7)
-);
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `products`
 --
 
+DROP TABLE IF EXISTS `products`;
 CREATE TABLE `products` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
@@ -268,13 +259,13 @@ INSERT INTO `products` (`id`, `name`, `description`, `price`, `stock`, `min_stoc
 (50, 'Jabra Elite 85t', 'Earbuds inalámbricos con cancelación de ruido adaptativa y 31h de batería', 179.99, 28, 5, 'https://m.media-amazon.com/images/I/71-3C3aYveL.jpg', 10, '2025-05-30 19:20:55'),
 (51, 'ROG Xbox Ally | 1T', '¡Descubre la ROG Ally, tu puerta de entrada a la élite del gaming portátil! Con la potencia de un PC y la versatilidad de una consola, juega tus títulos favoritos de Xbox y más, donde sea y cuando sea. ¡Rendimiento inigualable en tus manos', 649.99, 8, 5, 'https://cms-assets.xboxservices.com/assets/8b/26/8b26b482-20a7-4182-a64a-c97f2a221f59.png?n=9856321_Hero-Gallery-0_V01-01_1400x800.png', 4, '2025-06-13 20:02:25'),
 (52, 'Galaxy S24 Fe', 'teléfono inteligente Android desbloqueado de 256 GB, cámara de alta resolución de 50 MP, batería de larga duración, pantalla de visualización más brillante', 700.00, 25, 5, 'https://m.media-amazon.com/images/I/51SG-FYxj7L._AC_SX679_.jpg', 2, '2025-06-25 02:15:08');
-
 -- --------------------------------------------------------
 
 --
 -- Estructura de tabla para la tabla `sales`
 --
 
+DROP TABLE IF EXISTS `sales`;
 CREATE TABLE `sales` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
@@ -306,30 +297,10 @@ INSERT INTO `sales` (`id`, `user_id`, `customer_name`, `customer_email`, `custom
 -- --------------------------------------------------------
 
 --
--- Estructura Stand-in para la vista `sales_summary`
--- (Véase abajo para la vista actual)
---
-CREATE TABLE `sales_summary` (
-`id` int(11)
-,`invoice_number` varchar(50)
-,`customer_name` varchar(100)
-,`sale_date` datetime
-,`total_amount` decimal(10,2)
-,`tax_amount` decimal(10,2)
-,`discount_amount` decimal(10,2)
-,`final_amount` decimal(10,2)
-,`payment_method` enum('efectivo','tarjeta_credito','tarjeta_debito','transferencia','cheque')
-,`payment_status` enum('pendiente','pagado','cancelado','reembolsado')
-,`seller_name` varchar(50)
-,`total_items` bigint(21)
-);
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `sale_details`
 --
 
+DROP TABLE IF EXISTS `sale_details`;
 CREATE TABLE `sale_details` (
   `id` int(11) NOT NULL,
   `sale_id` int(11) NOT NULL,
@@ -357,25 +328,10 @@ INSERT INTO `sale_details` (`id`, `sale_id`, `product_id`, `product_name`, `prod
 -- --------------------------------------------------------
 
 --
--- Estructura Stand-in para la vista `seller_stats`
--- (Véase abajo para la vista actual)
---
-CREATE TABLE `seller_stats` (
-`id` int(11)
-,`username` varchar(50)
-,`email` varchar(100)
-,`total_sales` bigint(21)
-,`total_revenue` decimal(32,2)
-,`avg_sale_amount` decimal(14,6)
-,`last_sale_date` datetime
-);
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `shopping_cart`
 --
 
+DROP TABLE IF EXISTS `shopping_cart`;
 CREATE TABLE `shopping_cart` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
@@ -389,25 +345,10 @@ CREATE TABLE `shopping_cart` (
 -- --------------------------------------------------------
 
 --
--- Estructura Stand-in para la vista `top_selling_products`
--- (Véase abajo para la vista actual)
---
-CREATE TABLE `top_selling_products` (
-`id` int(11)
-,`name` varchar(100)
-,`price` decimal(10,2)
-,`category_name` varchar(100)
-,`total_sold` decimal(32,0)
-,`total_revenue` decimal(32,2)
-,`times_sold` bigint(21)
-);
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `users`
 --
 
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
@@ -437,36 +378,36 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `customer_id
 --
 -- Estructura para la vista `pending_invoices`
 --
-DROP TABLE IF EXISTS `pending_invoices`;
+DROP VIEW IF EXISTS `pending_invoices`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `pending_invoices`  AS SELECT `i`.`id` AS `id`, `i`.`invoice_number` AS `invoice_number`, `i`.`invoice_date` AS `invoice_date`, `i`.`due_date` AS `due_date`, `i`.`total_amount` AS `total_amount`, `i`.`invoice_status` AS `invoice_status`, `s`.`customer_name` AS `customer_name`, `s`.`customer_email` AS `customer_email`, `s`.`customer_phone` AS `customer_phone`, to_days(curdate()) - to_days(`i`.`due_date`) AS `days_overdue` FROM (`invoices` `i` join `sales` `s` on(`i`.`sale_id` = `s`.`id`)) WHERE `i`.`invoice_status` in ('enviada','vencida') ORDER BY `i`.`due_date` ASC ;
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `pending_invoices` AS SELECT `i`.`id` AS `id`, `i`.`invoice_number` AS `invoice_number`, `i`.`invoice_date` AS `invoice_date`, `i`.`due_date` AS `due_date`, `i`.`total_amount` AS `total_amount`, `i`.`invoice_status` AS `invoice_status`, `s`.`customer_name` AS `customer_name`, `s`.`customer_email` AS `customer_email`, `s`.`customer_phone` AS `customer_phone`, to_days(curdate()) - to_days(`i`.`due_date`) AS `days_overdue` FROM (`invoices` `i` join `sales` `s` on(`i`.`sale_id` = `s`.`id`)) WHERE `i`.`invoice_status` in ('enviada','vencida') ORDER BY `i`.`due_date` ASC ;
 
 -- --------------------------------------------------------
 
 --
 -- Estructura para la vista `sales_summary`
 --
-DROP TABLE IF EXISTS `sales_summary`;
+DROP VIEW IF EXISTS `sales_summary`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `sales_summary`  AS SELECT `s`.`id` AS `id`, `s`.`invoice_number` AS `invoice_number`, `s`.`customer_name` AS `customer_name`, `s`.`sale_date` AS `sale_date`, `s`.`total_amount` AS `total_amount`, `s`.`tax_amount` AS `tax_amount`, `s`.`discount_amount` AS `discount_amount`, `s`.`final_amount` AS `final_amount`, `s`.`payment_method` AS `payment_method`, `s`.`payment_status` AS `payment_status`, `u`.`username` AS `seller_name`, count(`sd`.`id`) AS `total_items` FROM ((`sales` `s` left join `users` `u` on(`s`.`user_id` = `u`.`id`)) left join `sale_details` `sd` on(`s`.`id` = `sd`.`sale_id`)) GROUP BY `s`.`id` ;
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `sales_summary` AS SELECT `s`.`id` AS `id`, `s`.`invoice_number` AS `invoice_number`, `s`.`customer_name` AS `customer_name`, `s`.`sale_date` AS `sale_date`, `s`.`total_amount` AS `total_amount`, `s`.`tax_amount` AS `tax_amount`, `s`.`discount_amount` AS `discount_amount`, `s`.`final_amount` AS `final_amount`, `s`.`payment_method` AS `payment_method`, `s`.`payment_status` AS `payment_status`, `u`.`username` AS `seller_name`, count(`sd`.`id`) AS `total_items` FROM ((`sales` `s` left join `users` `u` on(`s`.`user_id` = `u`.`id`)) left join `sale_details` `sd` on(`s`.`id` = `sd`.`sale_id`)) GROUP BY `s`.`id` ;
 
 -- --------------------------------------------------------
 
 --
 -- Estructura para la vista `seller_stats`
 --
-DROP TABLE IF EXISTS `seller_stats`;
+DROP VIEW IF EXISTS `seller_stats`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `seller_stats`  AS SELECT `u`.`id` AS `id`, `u`.`username` AS `username`, `u`.`email` AS `email`, count(`s`.`id`) AS `total_sales`, sum(`s`.`final_amount`) AS `total_revenue`, avg(`s`.`final_amount`) AS `avg_sale_amount`, max(`s`.`sale_date`) AS `last_sale_date` FROM (`users` `u` left join `sales` `s` on(`u`.`id` = `s`.`user_id`)) WHERE `u`.`role` = 'admin' GROUP BY `u`.`id` ;
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `seller_stats` AS SELECT `u`.`id` AS `id`, `u`.`username` AS `username`, `u`.`email` AS `email`, count(`s`.`id`) AS `total_sales`, sum(`s`.`final_amount`) AS `total_revenue`, avg(`s`.`final_amount`) AS `avg_sale_amount`, max(`s`.`sale_date`) AS `last_sale_date` FROM (`users` `u` left join `sales` `s` on(`u`.`id` = `s`.`user_id`)) WHERE `u`.`role` = 'admin' GROUP BY `u`.`id` ;
 
 -- --------------------------------------------------------
 
 --
 -- Estructura para la vista `top_selling_products`
 --
-DROP TABLE IF EXISTS `top_selling_products`;
+DROP VIEW IF EXISTS `top_selling_products`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `top_selling_products`  AS SELECT `p`.`id` AS `id`, `p`.`name` AS `name`, `p`.`price` AS `price`, `c`.`name` AS `category_name`, sum(`sd`.`quantity`) AS `total_sold`, sum(`sd`.`subtotal`) AS `total_revenue`, count(distinct `sd`.`sale_id`) AS `times_sold` FROM ((`products` `p` left join `sale_details` `sd` on(`p`.`id` = `sd`.`product_id`)) left join `categories` `c` on(`p`.`category_id` = `c`.`id`)) GROUP BY `p`.`id` ORDER BY sum(`sd`.`quantity`) DESC ;
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `top_selling_products` AS SELECT `p`.`id` AS `id`, `p`.`name` AS `name`, `p`.`price` AS `price`, `c`.`name` AS `category_name`, sum(`sd`.`quantity`) AS `total_sold`, sum(`sd`.`subtotal`) AS `total_revenue`, count(distinct `sd`.`sale_id`) AS `times_sold` FROM ((`products` `p` left join `sale_details` `sd` on(`p`.`id` = `sd`.`product_id`)) left join `categories` `c` on(`p`.`category_id` = `c`.`id`)) GROUP BY `p`.`id` ORDER BY sum(`sd`.`quantity`) DESC ;
 
 --
 -- Índices para tablas volcadas
@@ -648,7 +589,8 @@ ALTER TABLE `shopping_cart`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `fk_users_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-COMMIT;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

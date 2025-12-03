@@ -6,8 +6,8 @@
             --dark-gray: #0f0f23;
             --accent-blue: #4ecdc4;
             --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --text-muted: #6c757d;
+            --text-secondary: #d0d0d0;
+            --text-muted: #a0a0a0;
             --surface-color: #1a1a2e;
             --surface-light: #16213e;
             --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -118,7 +118,7 @@
 
         .user-email {
             font-size: 0.9rem;
-            opacity: 0.7;
+            opacity: 0.9;
             color: var(--text-secondary);
         }
 
@@ -270,7 +270,8 @@
         }
 
         .search-input::placeholder {
-            color: var(--text-muted);
+            color: #888888;
+            opacity: 0.8;
         }
 
         .search-icon {
@@ -278,8 +279,8 @@
             left: 18px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-muted);
-        }
+            color: var(--text-secondary);
+        }}
 
         .categories-grid {
             display: grid;
@@ -359,6 +360,7 @@
             color: var(--text-secondary);
             line-height: 1.6;
             margin-bottom: 20px;
+            font-weight: 400;
         }
 
         .category-stats {
@@ -383,8 +385,9 @@
 
         .stat-label {
             font-size: 0.8rem;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             text-transform: uppercase;
+            font-weight: 600;
         }
 
         .category-actions {
@@ -457,8 +460,8 @@
         }
 
         .form-label {
-            color: var(--text-secondary);
-            font-weight: 500;
+            color: var(--text-primary);
+            font-weight: 600;
             margin-bottom: 8px;
             display: block;
         }
@@ -511,7 +514,8 @@
 
         .upload-placeholder {
             text-align: center;
-            color: var(--text-muted);
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
         .upload-placeholder i {
@@ -523,7 +527,7 @@
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: var(--text-muted);
+            color: var(--text-secondary);
         }
 
         .empty-state i {

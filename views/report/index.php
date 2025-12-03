@@ -17,22 +17,16 @@ if (!canAccessReports()) {
     redirect('../../index.php');
 }
 
-// Configuración de conexión a la base de datos
-$host = '127.0.0.1';
-$db   = 'ds7';
-$user = 'admin';
-$pass = '1234';
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
+// Configuración de conexión a la base de datos usando la clase Database
+require_once __DIR__ . '/../../config/database.php';
 
 try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
+    $database = new Database();
+    $pdo = $database->getConnection();
+    
+    if (!$pdo) {
+        throw new PDOException("No se pudo establecer la conexión a la base de datos");
+    }
 } catch (PDOException $e) {
     echo "Error de conexión: " . $e->getMessage();
     exit;
